@@ -2,45 +2,45 @@ using System.Numerics;
 
 namespace FlatAppStore.UI.Framework
 {
-    public abstract class Control : PropertyAnimateable
-    {
-        public LayoutControl Parent { get; private set; }
-        public virtual NavigatorControl Navigator { get => Parent.Navigator; }
+	public abstract class Control : PropertyAnimateable
+	{
+		public LayoutControl Parent { get; private set; }
+		public virtual NavigatorControl Navigator { get => Parent.Navigator; }
 
-        public Transform Transform { get; private set; }
+		public Transform Transform { get; private set; }
 
-        public bool IsInitialized { get; private set; }
+		public bool IsInitialized { get; private set; }
 
-        public void Initialize(LayoutControl parent, Transform transform)
-        {
-            Parent = parent;
-            Transform = transform;
+		public void Initialize(LayoutControl parent, Transform transform)
+		{
+			Parent = parent;
+			Transform = transform;
 
-            IsInitialized = true;
+			IsInitialized = true;
 
-            Initialized();
+			Initialized();
 
-            Invalidate();
-        }
+			Invalidate();
+		}
 
-        protected virtual void Initialized() { }
-        public virtual void Removed() { }
+		protected virtual void Initialized() { }
+		public virtual void Removed() { }
 
-        public virtual void Invalidate()
-        {
-            if (Transform != null) Transform.UpdateBounds();
-        }
+		public virtual void Invalidate()
+		{
+			if (Transform != null) Transform.UpdateBounds();
+		}
 
-        public abstract bool PerferExpandToParent { get; }
-        public abstract Vector2 GetMinPreferredSize();
-        public abstract void Draw();
+		public abstract bool PerferExpandToParent { get; }
+		public abstract Vector2 GetMinPreferredSize();
+		public abstract void Draw(Canvas canvas);
 
 
-        public void RemoveFromParent()
-        {
-            if (Parent != null) Parent.RemoveChild(this);
-        }
+		public void RemoveFromParent()
+		{
+			if (Parent != null) Parent.RemoveChild(this);
+		}
 
-        public virtual void OnInput(ControllerButton button) { }
-    }
+		public virtual void OnInput(ControllerButton button) { }
+	}
 }
