@@ -1,111 +1,135 @@
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace FlatAppStore.UI.Framework
 {
-	public abstract class LayoutControl : Control
-	{
-		public IEnumerable<Control> Children => children;
-		private readonly List<Control> children = new List<Control>();
+    public abstract class LayoutControl : Control
+    {
+        public IEnumerable<Control> Children => children;
+        private readonly List<Control> children = new List<Control>();
 
-		private Control toBeAdded = null;
+        private Control toBeAdded = null; // We don't want to render this
 
-		public void AddChild(Control child)
-		{
-			toBeAdded = child;
-			QueuePostChildLoop(() =>
-			{
-				if (!children.Contains(child))
-				{
-					children.Add(child);
-					child.Initialize(this, CreateTransform(child));
+        public void AddChild(Control child)
+        {
+            if (IsInitialized) toBeAdded = child; // If we aren't initialized yet, this value will never be reset and will cause bugs
+            QueuePostChildLoop(() =>
+            {
+                if (!children.Contains(child))
+                {
+                    children.Add(child);
 
-					AddedChild(child);
+                    if (IsInitialized) // Only initialize children if we are initialized.
+                    {
+                        child.Initialize(this, CreateTransform(child));
 
-					toBeAdded = null;
+                        AddedChild(child);
 
-					Invalidate();
-				}
-			});
-		}
+                        toBeAdded = null;
 
-		public void RemoveChild(Control child)
-		{
-			QueuePostChildLoop(() =>
-			{
-				children.Remove(child);
+                        Invalidate();
+                    }
+                }
+            });
+        }
 
-				child.Removed();
+        public void RemoveChild(Control child)
+        {
+            QueuePostChildLoop(() =>
+            {
+                children.Remove(child);
 
-				RemovedChild(child);
+                child.Removed();
 
-				Invalidate();
-			});
-		}
+                RemovedChild(child);
 
-		protected abstract Transform CreateTransform(Control control);
+                Invalidate();
+            });
+        }
 
-		public override void Invalidate()
-		{
-			base.Invalidate();
+        protected abstract Transform CreateTransform(Control control);
 
-			StartChildLoop();
-			foreach (var child in children)
-				child.Invalidate();
-			EndChildLoop();
-		}
+        protected override void Initialized()
+        {
+            base.Initialized();
 
-		public override void Draw()
-		{
-			// We don't need to draw anything for ourselves since this control just does layout.
+            foreach (var child in children) // Now that we initialized, we can finnish initializing all of our children
+            {
+                child.Initialize(this, CreateTransform(child));
 
-			StartChildLoop();
-			foreach (var child in Children)
-				if (child != toBeAdded)
-					child.Draw();
-			EndChildLoop();
-		}
+                AddedChild(child);
+            }
+        }
 
-		public override void OnInput(ControllerButton button)
-		{
-			base.OnInput(button);
+        public override void Invalidate()
+        {
+            base.Invalidate();
 
-			StartChildLoop();
-			foreach (var child in Children)
-				child.OnInput(button);
-			EndChildLoop();
-		}
+            StartChildLoop();
+            Control prevChild = null;
+            for (int i = 0; i < children.Count; i++)
+            {
+                var child = children[i];
+                child.Transform.LayoutData = new TransformLayoutData(i, children.Count, prevChild);
+                child.Invalidate();
 
-		private readonly Queue<Action> onEndChildloopQueue = new Queue<Action>();
-		bool isInChildLoop = false;
+                prevChild = child;
+            }
+            EndChildLoop();
+        }
 
-		private void StartChildLoop()
-		{
-			isInChildLoop = true;
-		}
+        public override void Draw()
+        {
+            // We don't need to draw anything for ourselves since this control just does layout.
 
-		private void EndChildLoop()
-		{
-			if (isInChildLoop)
-			{
-				while (onEndChildloopQueue.TryDequeue(out Action action))
-				{
-					action();
-				}
+            StartChildLoop();
+            foreach (var child in Children)
+                if (child != toBeAdded)
+                    child.Draw();
+            EndChildLoop();
+        }
 
-				isInChildLoop = false;
-			}
-		}
+        public override void OnInput(ControllerButton button)
+        {
+            base.OnInput(button);
 
-		protected void QueuePostChildLoop(Action action)
-		{
-			if (isInChildLoop)
-				onEndChildloopQueue.Enqueue(action);
-			else
-				action();
-		}
+            StartChildLoop();
+            foreach (var child in Children)
+                child.OnInput(button);
+            EndChildLoop();
+        }
 
-		protected virtual void AddedChild(Control child) { }
-		protected virtual void RemovedChild(Control child) { }
-	}
+        private readonly Queue<Action> onEndChildloopQueue = new Queue<Action>();
+        bool isInChildLoop = false;
+
+        protected void StartChildLoop()
+        {
+            isInChildLoop = true;
+        }
+
+        protected void EndChildLoop()
+        {
+            if (isInChildLoop)
+            {
+                while (onEndChildloopQueue.TryDequeue(out Action action))
+                {
+                    action();
+                }
+
+                isInChildLoop = false;
+            }
+        }
+
+        protected void QueuePostChildLoop(Action action)
+        {
+            if (isInChildLoop)
+                onEndChildloopQueue.Enqueue(action);
+            else
+                action();
+        }
+
+        protected virtual void AddedChild(Control child) { }
+        protected virtual void RemovedChild(Control child) { }
+    }
 }
