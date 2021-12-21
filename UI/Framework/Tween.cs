@@ -41,6 +41,12 @@ namespace FlatAppStore.UI.Framework
 			Current = initial;
 		}
 
+		public Tween<T> BindUpdated(Action onUpdated)
+		{
+			OnUpdated += (tween) => onUpdated();
+			return this;
+		}
+
 		public Tween<T> BindUpdated(Action<Tween<T>> onUpdated)
 		{
 			OnUpdated += onUpdated;

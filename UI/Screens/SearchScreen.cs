@@ -2,17 +2,21 @@ using FlatAppStore.UI.Framework;
 
 namespace FlatAppStore.UI.Screens
 {
-    public class SearchScreen : ScreenControl
-    {
-        protected override Control BuildScreen()
-        {
-            var layout = new SimpleDirectionLayoutControl(LayoutDirection.Vertical);
+	public class SearchScreen : ScreenControl
+	{
+		public override string Title => "Search";
 
-            var header = new RectControl(new Raylib_cs.Color(53, 66, 74, 50));
-            header.Height = 100;
-            layout.AddChild(header);
+		protected override Control Build()
+		{
+			AddAction(ControllerButton.Face_Right, "Back", () => RemoveFromParent());
 
-            return layout;
-        }
-    }
+			var layout = new SimpleDirectionLayoutControl(LayoutDirection.Vertical);
+
+			var header = new RectControl(Raylib_cs.Color.BLACK);
+			header.Height = 100;
+			layout.AddChild(header, (t) => (t as SimpleDirectionLayoutControlTransform).CrossAxisAlignment = CrossAxisAlignment.Stretch);
+
+			return layout;
+		}
+	}
 }

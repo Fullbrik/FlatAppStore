@@ -8,7 +8,8 @@ namespace FlatAppStore
 	{
 		static void Main(string[] args)
 		{
-			UI.Framework.Engine.Instance.Run(new UI.Screens.StartupScreen());
+			using (var engine = new UI.Framework.Engine())
+				engine.Run(new UI.Screens.StartupScreen());
 		}
 	}
 }

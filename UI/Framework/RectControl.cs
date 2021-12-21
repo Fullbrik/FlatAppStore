@@ -7,7 +7,8 @@ namespace FlatAppStore.UI.Framework
 	{
 		public Color Color { get; set; } = Color.BLACK;
 
-		public override bool PerferExpandToParent => ExpandToParent;
+		public override bool PerferExpandToParentWidth => ExpandToParent;
+		public override bool PerferExpandToParentHeight => ExpandToParent;
 
 		public bool ExpandToParent { get; set; } = false;
 
@@ -23,14 +24,20 @@ namespace FlatAppStore.UI.Framework
 			Color = color;
 		}
 
-		public override void Draw(Canvas canvas)
+		public override void Draw()
 		{
-			Raylib.DrawRectangleRec(Transform.Bounds, Color);
+			Raylib.DrawRectangleRec(Transform.DrawBounds, Color);
 		}
 
-		public override Vector2 GetMinPreferredSize()
+		public override Vector2 GetSize(Vector2 maxSize)
 		{
-			return Size;
+			if (ExpandToParent) return maxSize;
+			else return Size;
 		}
+
+		// public override Vector2 GetMinPreferredSize()
+		// {
+		// 	return Size;
+		// }
 	}
 }

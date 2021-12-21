@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -5,16 +6,21 @@ using Raylib_cs;
 
 namespace FlatAppStore.UI.Framework
 {
-	public class Engine
+	public class Engine : IDisposable
 	{
-		public static Engine Instance { get; } = new Engine();
+		private bool disposedValue;
 
 		public InputManager InputManager { get; } = new InputManager();
 
-		public RootControl Root { get; } = new RootControl();
+		public RootControl Root { get; }
 		public NavigatorControl Navigator { get; } = new NavigatorControl();
 
 		public float TargetResolutionWidth { get; set; } = 800;
+
+		public Engine()
+		{
+			Root = new RootControl(this);
+		}
 
 		public void Run(/*float targetScale,/*int targetWidth, int targetHeight, CanvasScaleDirection scaleDirection, */ Control starting)
 		{
@@ -34,9 +40,9 @@ namespace FlatAppStore.UI.Framework
 
 		private void Initialize()
 		{
+			InitializeWindow();
 			InitializeDrivers();
 			InitializeControls();
-			InitializeWindow();
 		}
 
 		public void InitializeDrivers()
@@ -54,7 +60,7 @@ namespace FlatAppStore.UI.Framework
 		private void InitializeWindow()
 		{
 			//Raylib.InitWindow(Raylib.GetScreenWidth(), Raylib.GetScreenHeight(), "Flathub App Store");
-			Raylib.InitWindow(500, 500, "Flathub App Store");
+			Raylib.InitWindow(1280, 800, "Flathub App Store");
 			Raylib.SetExitKey(KeyboardKey.KEY_NULL);
 			//Raylib.SetWindowState(ConfigFlags.FLAG_FULLSCREEN_MODE | ConfigFlags.FLAG_VSYNC_HINT);
 			Raylib.SetWindowState(ConfigFlags.FLAG_VSYNC_HINT | ConfigFlags.FLAG_WINDOW_RESIZABLE);
@@ -63,36 +69,26 @@ namespace FlatAppStore.UI.Framework
 
 		private void DoEngineLoop()
 		{
-			var textureResolution = Raymath.Vector2Normalize(new Vector2(Raylib.GetScreenWidth(), Raylib.GetScreenHeight())) * TargetResolutionWidth;
-			var renderTexture = Raylib.LoadRenderTexture((int)textureResolution.X, (int)textureResolution.Y);
+			// Relayout the root widget
+			Root.GetSize(new Vector2(Raylib.GetScreenWidth(), Raylib.GetScreenHeight()));
+			Root.Invalidate();
+
+			var control = Navigator.GetChild<LayoutControl>(0).GetChild<LayoutControl>(0);
 
 			while (!Raylib.WindowShouldClose() && Navigator.Children.Count() > 0)
 			{
 				if (Raylib.IsWindowResized())
 				{
-					Raylib.UnloadRenderTexture(renderTexture);
-
-					textureResolution = Raymath.Vector2Normalize(new Vector2(Raylib.GetScreenWidth(), Raylib.GetScreenHeight())) * TargetResolutionWidth;
-					renderTexture = Raylib.LoadRenderTexture((int)textureResolution.X, (int)textureResolution.Y);
-
-					//Root.Invalidate();
+					Root.Invalidate();
 				}
-
-				Root.Invalidate();
 
 				Raylib.BeginDrawing();
 
-				Raylib.ClearBackground(Color.BLACK);
+				Raylib.ClearBackground(Color.GRAY);
 
-				Raylib.BeginTextureMode(renderTexture);
-				Root.Draw(null);
-				Raylib.EndTextureMode();
+				Root.Draw();
 
-				Raylib.DrawTexturePro(
-					renderTexture.texture,
-					new Rectangle(0, 0, renderTexture.texture.width, -renderTexture.texture.height),
-					new Rectangle(0, 0, renderTexture.texture.width, renderTexture.texture.height),//Raylib.GetScreenWidth(), Raylib.GetScreenHeight()),
-					Vector2.Zero, 0, Color.WHITE);//(renderTexture.texture, Vector2.Zero, 0, Raylib.GetScreenHeight() / textureResolution.Y, Color.WHITE);
+				//Raylib_cs.Raylib.DrawRectangleLinesEx(control.Transform.DrawBounds, 5, Raylib_cs.Color.DARKGREEN);
 
 				Raylib.DrawFPS(10, 10);
 				Raylib.EndDrawing();
@@ -100,7 +96,6 @@ namespace FlatAppStore.UI.Framework
 				Updateables.UpdateAll(Raylib.GetFrameTime());
 			}
 
-			Raylib.UnloadRenderTexture(renderTexture);
 			Raylib.CloseWindow();
 		}
 
@@ -120,6 +115,34 @@ namespace FlatAppStore.UI.Framework
 					PrintControlTreePart(child, prefix + '\t');
 				}
 			}
+		}
+
+		protected virtual void Dispose(bool disposing)
+		{
+			if (!disposedValue)
+			{
+				if (disposing)
+				{
+					// TODO: dispose managed state (managed objects)
+				}
+
+				InputManager.Dispose();
+				// TODO: set large fields to null
+				disposedValue = true;
+			}
+		}
+
+		~Engine()
+		{
+			// Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+			Dispose(disposing: false);
+		}
+
+		public void Dispose()
+		{
+			// Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+			Dispose(disposing: true);
+			GC.SuppressFinalize(this);
 		}
 	}
 }

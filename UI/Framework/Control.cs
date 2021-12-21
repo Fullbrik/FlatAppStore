@@ -1,3 +1,4 @@
+using System;
 using System.Numerics;
 
 namespace FlatAppStore.UI.Framework
@@ -6,9 +7,11 @@ namespace FlatAppStore.UI.Framework
 	{
 		public LayoutControl Parent { get; private set; }
 		public virtual NavigatorControl Navigator { get => Parent.Navigator; }
+		public virtual InputManager InputManager { get => Parent?.InputManager; }
 
 		public Transform Transform { get; private set; }
 
+		public event Action<Transform> OnTransformInitialized;
 		public bool IsInitialized { get; private set; }
 
 		public void Initialize(LayoutControl parent, Transform transform)
@@ -17,6 +20,8 @@ namespace FlatAppStore.UI.Framework
 			Transform = transform;
 
 			IsInitialized = true;
+
+			OnTransformInitialized?.Invoke(Transform);
 
 			Initialized();
 
@@ -28,12 +33,17 @@ namespace FlatAppStore.UI.Framework
 
 		public virtual void Invalidate()
 		{
-			if (Transform != null) Transform.UpdateBounds();
+			if (Transform != null)
+				Transform.UpdateTransform();
 		}
 
-		public abstract bool PerferExpandToParent { get; }
-		public abstract Vector2 GetMinPreferredSize();
-		public abstract void Draw(Canvas canvas);
+		//public abstract bool PerferExpandToParent { get; }
+		public abstract bool PerferExpandToParentWidth { get; }
+		public abstract bool PerferExpandToParentHeight { get; }
+		//public abstract Vector2 GetMinPreferredSize();
+
+		public abstract Vector2 GetSize(Vector2 maxSize);
+		public abstract void Draw();
 
 
 		public void RemoveFromParent()

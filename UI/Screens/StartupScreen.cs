@@ -8,18 +8,23 @@ namespace FlatAppStore.UI.Screens
 	{
 		bool didAdd = false;
 
-		protected override Control BuildScreen()
+		public override string Title => "Startup";
+
+		protected override Control Build()
 		{
 			var control = new SimpleDirectionLayoutControl(LayoutDirection.Vertical);
 
 			var rect1 = new RectControl(Color.RED);
-			rect1.Size = new System.Numerics.Vector2(100, 100);
+			rect1.Size = new System.Numerics.Vector2(100, 50);
 			control.AddChild(rect1);
 
 			var rect2 = new RectControl(Color.ORANGE);
 			rect2.Size = new System.Numerics.Vector2(100, 100);
 			rect2.ExpandToParent = true;
 			control.AddChild(rect2);
+
+			AddAction(ControllerButton.Face_Right, "Back", () => RemoveFromParent());
+			AddAction(ControllerButton.DPAD_Up, "Invalidate", () => Navigator.Invalidate());
 
 			return control;
 		}
@@ -35,9 +40,6 @@ namespace FlatAppStore.UI.Screens
 					case ControllerButton.Face_Down:
 						//didAdd = true;
 						Navigator.AddChild(new SearchScreen());
-						break;
-					case ControllerButton.Face_Right:
-						RemoveFromParent();
 						break;
 					default:
 						break;

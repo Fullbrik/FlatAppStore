@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using Raylib_cs;
 
 namespace FlatAppStore.UI.Framework
 {
@@ -9,16 +10,25 @@ namespace FlatAppStore.UI.Framework
 		public IEnumerable<Control> Children => children;
 		private readonly List<Control> children = new List<Control>();
 
+		public bool IsLayoutPaused { get => isLayoutPaused || (Parent?.IsLayoutPaused ?? false); }
+		private bool isLayoutPaused = false;
+
 		private Control toBeAdded = null; // We don't want to render this
 
-		public void AddChild(Control child)
+		public void AddChild(Control child) => AddChild(child, null);
+
+		public void AddChild(Control child, Action<Transform> initTransform)
 		{
 			if (IsInitialized) toBeAdded = child; // If we aren't initialized yet, this value will never be reset and will cause bugs
+
 			QueuePostChildLoop(() =>
 			{
 				if (!children.Contains(child))
 				{
 					children.Add(child);
+
+					if (initTransform != null) // Bind event to transform initialization
+						child.OnTransformInitialized += initTransform;
 
 					if (IsInitialized) // Only initialize children if we are initialized.
 					{
@@ -48,6 +58,50 @@ namespace FlatAppStore.UI.Framework
 			});
 		}
 
+		public void RemoveAllChildren()
+		{
+			if (children.Count > 0) // Only do it if we have children
+			{
+				// We pause the layout so we don't invalidate a bunch
+				PauseLayout();
+
+				// Loop through all children, and remove them
+				StartChildLoop();
+				foreach (var child in Children)
+					RemoveChild(child);
+				EndChildLoop();
+
+				// We then resume
+				ResumeLayout();
+			}
+		}
+
+		public Control GetChild(int index)
+		{
+			return children[index];
+		}
+
+		public T GetChild<T>(int index)
+			where T : Control
+		{
+			return children[index] as T;
+		}
+
+
+		public void PauseLayout()
+		{
+			isLayoutPaused = true;
+		}
+
+		public void ResumeLayout()
+		{
+			if (isLayoutPaused)
+			{
+				isLayoutPaused = false;
+				Invalidate();
+			}
+		}
+
 		protected abstract Transform CreateTransform(Control control);
 
 		protected override void Initialized()
@@ -64,29 +118,75 @@ namespace FlatAppStore.UI.Framework
 
 		public override void Invalidate()
 		{
+			// if (!IsLayoutPaused)
+			// {
+			// 	StartChildLoop();
+			// 	Control prevChild = null;
+			// 	for (int i = 0; i < children.Count; i++)
+			// 	{
+			// 		var child = children[i];
+			// 		child.Transform.LayoutData = new TransformLayoutData(i, children.Count, prevChild);
+			// 		child.Invalidate();
+
+			// 		prevChild = child;
+			// 	}
+			// 	EndChildLoop();
+			// }
+
 			base.Invalidate();
 
-			StartChildLoop();
-			Control prevChild = null;
-			for (int i = 0; i < children.Count; i++)
+			if (!IsLayoutPaused)
 			{
-				var child = children[i];
-				child.Transform.LayoutData = new TransformLayoutData(i, children.Count, prevChild);
-				child.Invalidate();
+				ReLayoutChildren();
+			}
 
-				prevChild = child;
+			StartChildLoop();
+			foreach (var child in children)
+			{
+				child.Invalidate();
 			}
 			EndChildLoop();
 		}
 
-		public override void Draw(Canvas canvas)
+		private Vector2 prevMaxSize = Vector2.Zero;
+		private Vector2 prevSize = Vector2.Zero;
+
+		public override Vector2 GetSize(Vector2 maxSize)
+		{
+			prevMaxSize = maxSize;
+
+			StartChildLoop();
+			var size = LayoutChildrenAndGetSize(maxSize);
+			prevSize = size;
+			EndChildLoop();
+
+			return size;
+		}
+		public void ReLayoutChildren()
+		{
+			StartChildLoop();
+			var size = LayoutChildrenAndGetSize(prevMaxSize);
+			EndChildLoop();
+
+			if (prevSize != size) Parent.ReLayoutChildren(); // We will have to relayout everything because our size changed
+															 //Invalidate();
+		}
+		protected abstract Vector2 LayoutChildrenAndGetSize(Vector2 maxSize);
+
+		protected void SetChildLocalBounds(Control child, Rectangle bounds)
+		{
+			//child.Transform.UpdateTransform(bounds);
+			child.Transform.LocalBounds = bounds;
+		}
+
+		public override void Draw()
 		{
 			// We don't need to draw anything for ourselves since this control just does layout.
 
 			StartChildLoop();
 			foreach (var child in Children)
 				if (child != toBeAdded)
-					child.Draw(canvas);
+					child.Draw();
 			EndChildLoop();
 		}
 

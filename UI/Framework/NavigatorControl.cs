@@ -7,15 +7,34 @@ namespace FlatAppStore.UI.Framework
 	{
 		public override NavigatorControl Navigator => this;
 
+		public int FooterHeight { get; } = 50;
+		public FooterControl Footer { get; } = new FooterControl();
+
 		public Control CurrentPage { get; set; }
 
-		public override bool PerferExpandToParent => true;
+		public override bool PerferExpandToParentWidth => true;
+
+		public override bool PerferExpandToParentHeight => true;
 
 		private Control removedPage;
 
 		protected override Transform CreateTransform(Control control)
 		{
-			return new FillParentTransform(control);
+			return new NavigatorControlTransform(control, FooterHeight);
+		}
+
+		protected override void Initialized()
+		{
+			base.Initialized();
+
+			Footer.Initialize(this, new NavigatorControlFooterTransform(Footer, FooterHeight));
+		}
+
+		public override void Invalidate()
+		{
+			base.Invalidate();
+
+			Footer.Invalidate();
 		}
 
 		protected override void AddedChild(Control child)
@@ -25,28 +44,30 @@ namespace FlatAppStore.UI.Framework
 			// Play an animation on the current page
 			if (CurrentPage != null)
 			{
-				CurrentPage.Transform.AnimateProperty<float>("OffsetX")
+				CurrentPage.Transform.AnimateProperty<float>("PaddingLeft")
 					.To(20, 0.15f)
 					.Delay(0.1f)
 					.To(0, 0)
 					.Start();
 
-				CurrentPage.Transform.AnimateProperty<float>("OffsetY")
+				CurrentPage.Transform.AnimateProperty<float>("PaddingRight")
 					.To(20, 0.15f)
 					.Delay(0.1f)
 					.To(0, 0)
 					.Start();
 
-				CurrentPage.Transform.AnimateProperty<float>("OffsetWidth")
-					.To(-40, 0.15f)
+				CurrentPage.Transform.AnimateProperty<float>("PaddingTop")
+					.To(20, 0.15f)
 					.Delay(0.1f)
 					.To(0, 0)
 					.Start();
 
-				CurrentPage.Transform.AnimateProperty<float>("OffsetHeight")
-					.To(-40, 0.15f)
+				CurrentPage.Transform.AnimateProperty<float>("PaddingBottom")
+					.BindUpdated(() => ReLayoutChildren()) // We want to relayout the children as we animate. We only need to do this on one tween though
+					.To(20, 0.15f)
 					.Delay(0.1f)
 					.To(0, 0)
+					.Do(() => ReLayoutChildren()) // Make sure we do one last relayout after we animate
 					.Start();
 			}
 
@@ -55,9 +76,11 @@ namespace FlatAppStore.UI.Framework
 
 			// Animate the page to slide in
 			child.Transform.AnimateProperty<float>("OffsetX")
-				.To(Transform.Bounds.width, 0)
+				.To(Transform.DrawBounds.width, 0)
 				.To(0, 0.2f)
 				.Start();
+
+			UpdateFooter();
 		}
 
 		protected override void RemovedChild(Control child)
@@ -66,23 +89,43 @@ namespace FlatAppStore.UI.Framework
 
 			if (CurrentPage == child)
 			{
-				CurrentPage = Children.Last();
+				CurrentPage = Children.LastOrDefault();
 
 				removedPage = child;
 
 				child.Transform.AnimateProperty<float>("OffsetX")
-					.To(Transform.Bounds.width, 0.2f)
+					.To(Transform.DrawBounds.width, 0.2f)
 					.Do(() => removedPage = null)
 					.Start();
 			}
+
+			UpdateFooter();
 		}
 
-		public override void Draw(Canvas canvas)
+		public void UpdateFooter()
 		{
-			base.Draw(canvas);
+			if (CurrentPage != null && CurrentPage is ScreenControl screen)
+			{
+				Footer.PageTitle = screen.Title;
+				Footer.ActionNames = screen.ActionNames;
+			}
+			else
+			{
+				Footer.PageTitle = "";
+				Footer.ActionNames = new System.Collections.Generic.Dictionary<ControllerButton, string>();
+			}
+
+			Footer.Invalidate();
+		}
+
+		public override void Draw()
+		{
+			base.Draw();
 
 			if (removedPage != null)
-				removedPage.Draw(canvas);
+				removedPage.Draw();
+
+			Footer.Draw();
 		}
 
 		public override void OnInput(ControllerButton button)
@@ -91,9 +134,64 @@ namespace FlatAppStore.UI.Framework
 			if (CurrentPage != null) CurrentPage.OnInput(button);
 		}
 
-		public override Vector2 GetMinPreferredSize()
+		protected override Vector2 LayoutChildrenAndGetSize(Vector2 maxSize)
 		{
-			throw new System.NotImplementedException();
+			foreach (var child in Children)
+			{
+				float x = 0;
+				float y = 0;
+
+				var childMaxSize = maxSize - new Vector2(0, FooterHeight);
+
+				// If the child has the proper transform, apply padding
+				if (child.Transform is NavigatorControlTransform transform)
+				{
+					x = transform.PaddingLeft;
+					y = transform.PaddingRight;
+					childMaxSize -= new Vector2(transform.PaddingLeft + transform.PaddingRight, transform.PaddingTop + transform.PaddingBottom);
+				}
+
+				var childSize = child.GetSize(childMaxSize);
+
+				SetChildLocalBounds(child, new Raylib_cs.Rectangle(x, y, maxSize.X, maxSize.Y - FooterHeight));
+			}
+
+			{
+				var childSize = Footer.GetSize(new Vector2(maxSize.X, FooterHeight));
+				SetChildLocalBounds(Footer, new Raylib_cs.Rectangle(0, maxSize.Y - FooterHeight, maxSize.X, FooterHeight));
+			}
+
+			return maxSize;
+		}
+
+		// public override Vector2 GetMinPreferredSize()
+		// {
+		// 	throw new System.NotImplementedException();
+		// }
+	}
+
+	public class NavigatorControlTransform : Transform
+	{
+		private int footerHeight = 0;
+
+		public float PaddingTop { get; set; }
+		public float PaddingBottom { get; set; }
+		public float PaddingRight { get; set; }
+		public float PaddingLeft { get; set; }
+
+		public NavigatorControlTransform(Control control, int footerHeight) : base(control)
+		{
+			this.footerHeight = footerHeight;
+		}
+	}
+
+	class NavigatorControlFooterTransform : Transform
+	{
+		private int footerHeight = 0;
+
+		public NavigatorControlFooterTransform(Control control, int footerHeight) : base(control)
+		{
+			this.footerHeight = footerHeight;
 		}
 	}
 }
