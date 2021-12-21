@@ -26,7 +26,9 @@ namespace FlatAppStore.UI.Framework
 				[ControllerButton.DPAD_Left] = Assets.AssetLoader.LoadTexture2D("/Assets/ControllerIcons/Keyboard/Arrow_Left_Key_Dark.png"),
 
 				[ControllerButton.Face_Down] = Assets.AssetLoader.LoadTexture2D("/Assets/ControllerIcons/Keyboard/Space_Key_Dark.png"),
-				[ControllerButton.Face_Right] = Assets.AssetLoader.LoadTexture2D("/Assets/ControllerIcons/Keyboard/Esc_Key_Dark.png")
+				[ControllerButton.Face_Right] = Assets.AssetLoader.LoadTexture2D("/Assets/ControllerIcons/Keyboard/Esc_Key_Dark.png"),
+				[ControllerButton.Face_Left] = Assets.AssetLoader.LoadTexture2D("/Assets/ControllerIcons/Keyboard/X_Key_Dark.png"),
+				[ControllerButton.Face_Up] = Assets.AssetLoader.LoadTexture2D("/Assets/ControllerIcons/Keyboard/Y_Key_Dark.png"),
 			};
 		}
 
@@ -45,8 +47,8 @@ namespace FlatAppStore.UI.Framework
 
 			if (Raylib.IsKeyPressed(KeyboardKey.KEY_SPACE)) yield return ControllerButton.Face_Down; // A
 			if (Raylib.IsKeyPressed(KeyboardKey.KEY_ESCAPE)) yield return ControllerButton.Face_Right; // B
-			if (Raylib.IsKeyPressed(KeyboardKey.KEY_X)) yield return ControllerButton.DPAD_Left; // X
-			if (Raylib.IsKeyPressed(KeyboardKey.KEY_Y)) yield return ControllerButton.DPAD_Right; // Y
+			if (Raylib.IsKeyPressed(KeyboardKey.KEY_X)) yield return ControllerButton.Face_Left; // X
+			if (Raylib.IsKeyPressed(KeyboardKey.KEY_Y)) yield return ControllerButton.Face_Up; // Y
 		}
 
 		public Texture2D GetButtonIcon(ControllerButton button)
