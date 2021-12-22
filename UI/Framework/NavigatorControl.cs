@@ -7,6 +7,9 @@ namespace FlatAppStore.UI.Framework
 	{
 		public override NavigatorControl Navigator => this;
 
+		public int HeaderHeight { get; } = 50;
+		public HeaderControl Header { get; } = new HeaderControl();
+
 		public int FooterHeight { get; } = 50;
 		public FooterControl Footer { get; } = new FooterControl();
 
@@ -25,15 +28,17 @@ namespace FlatAppStore.UI.Framework
 
 		protected override void Initialized()
 		{
-			base.Initialized();
+			Header.Initialize(this, new Transform(Header));
+			Footer.Initialize(this, new Transform(Footer));
 
-			Footer.Initialize(this, new NavigatorControlFooterTransform(Footer, FooterHeight));
+			base.Initialized();
 		}
 
 		public override void Invalidate()
 		{
 			base.Invalidate();
 
+			Header.Invalidate();
 			Footer.Invalidate();
 		}
 
@@ -125,6 +130,7 @@ namespace FlatAppStore.UI.Framework
 			if (removedPage != null)
 				removedPage.Draw();
 
+			Header.Draw();
 			Footer.Draw();
 		}
 
@@ -156,6 +162,13 @@ namespace FlatAppStore.UI.Framework
 				SetChildLocalBounds(child, new Raylib_cs.Rectangle(x, y, maxSize.X, maxSize.Y - FooterHeight));
 			}
 
+			//Layout Header
+			{
+				var childSize = Header.GetSize(new Vector2(maxSize.X, HeaderHeight));
+				SetChildLocalBounds(Header, new Raylib_cs.Rectangle(0, 0, maxSize.X, HeaderHeight));
+			}
+
+			// Layout Footer
 			{
 				var childSize = Footer.GetSize(new Vector2(maxSize.X, FooterHeight));
 				SetChildLocalBounds(Footer, new Raylib_cs.Rectangle(0, maxSize.Y - FooterHeight, maxSize.X, FooterHeight));
@@ -163,11 +176,6 @@ namespace FlatAppStore.UI.Framework
 
 			return maxSize;
 		}
-
-		// public override Vector2 GetMinPreferredSize()
-		// {
-		// 	throw new System.NotImplementedException();
-		// }
 	}
 
 	public class NavigatorControlTransform : Transform
@@ -180,16 +188,6 @@ namespace FlatAppStore.UI.Framework
 		public float PaddingLeft { get; set; }
 
 		public NavigatorControlTransform(Control control, int footerHeight) : base(control)
-		{
-			this.footerHeight = footerHeight;
-		}
-	}
-
-	class NavigatorControlFooterTransform : Transform
-	{
-		private int footerHeight = 0;
-
-		public NavigatorControlFooterTransform(Control control, int footerHeight) : base(control)
 		{
 			this.footerHeight = footerHeight;
 		}

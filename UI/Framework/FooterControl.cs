@@ -25,11 +25,6 @@ namespace FlatAppStore.UI.Framework
 		public override bool PerferExpandToParentWidth => true;
 		public override bool PerferExpandToParentHeight => false;
 
-		// public override Vector2 GetMinPreferredSize()
-		// {
-		// 	return new Vector2(50, 50);
-		// }
-
 		protected override Control Build()
 		{
 			AddChild(new GradientRectControl(new Raylib_cs.Color(0, 0, 0, 0), Raylib_cs.Color.BLACK, Raylib_cs.Color.BLACK, new Raylib_cs.Color(0, 0, 0, 0)) { ExpandToParent = true }, (t) => { t.OffsetY = -5; t.OffsetHeight = -30; }); // Add Shaddow
@@ -60,6 +55,11 @@ namespace FlatAppStore.UI.Framework
 			control.AddChild(actionsLayout);
 
 			return control;
+		}
+
+		protected override void Initialized()
+		{
+			base.Initialized();
 		}
 
 		private void UpdateActionsList()

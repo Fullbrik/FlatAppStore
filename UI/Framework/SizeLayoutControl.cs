@@ -25,11 +25,6 @@ namespace FlatAppStore.UI.Framework
 			Height = height;
 		}
 
-		// public override Vector2 GetMinPreferredSize()
-		// {
-		// 	return Size;
-		// }
-
 		protected override Transform CreateTransform(Control control)
 		{
 			return new Transform(control);

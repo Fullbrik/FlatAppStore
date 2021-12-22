@@ -40,10 +40,5 @@ namespace FlatAppStore.UI.Framework
 			if (ExpandToParent) return maxSize;
 			else return Size;
 		}
-
-		// public override Vector2 GetMinPreferredSize()
-		// {
-		// 	return Size;
-		// }
 	}
 }

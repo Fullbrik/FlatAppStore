@@ -25,6 +25,8 @@ namespace FlatAppStore.UI.Framework
 
 			Initialized();
 
+			//IsInitialized = true;
+
 			Invalidate();
 		}
 
@@ -37,10 +39,8 @@ namespace FlatAppStore.UI.Framework
 				Transform.UpdateTransform();
 		}
 
-		//public abstract bool PerferExpandToParent { get; }
 		public abstract bool PerferExpandToParentWidth { get; }
 		public abstract bool PerferExpandToParentHeight { get; }
-		//public abstract Vector2 GetMinPreferredSize();
 
 		public abstract Vector2 GetSize(Vector2 maxSize);
 		public abstract void Draw();

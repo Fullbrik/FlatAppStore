@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Numerics;
 using Raylib_cs;
 
@@ -7,10 +8,10 @@ namespace FlatAppStore.UI.Framework
 {
 	public abstract class LayoutControl : Control
 	{
-		public IEnumerable<Control> Children => children;
+		public ReadOnlyCollection<Control> Children => children.AsReadOnly();
 		private readonly List<Control> children = new List<Control>();
 
-		public bool IsLayoutPaused { get => isLayoutPaused || (Parent?.IsLayoutPaused ?? false); }
+		public bool IsLayoutPaused { get => !IsInitialized || isLayoutPaused || (Parent?.IsLayoutPaused ?? false); }
 		private bool isLayoutPaused = false;
 
 		private Control toBeAdded = null; // We don't want to render this
@@ -32,6 +33,7 @@ namespace FlatAppStore.UI.Framework
 
 					if (IsInitialized) // Only initialize children if we are initialized.
 					{
+						Console.WriteLine(child.GetType().FullName);
 						child.Initialize(this, CreateTransform(child));
 
 						AddedChild(child);
@@ -118,24 +120,14 @@ namespace FlatAppStore.UI.Framework
 
 		public override void Invalidate()
 		{
-			// if (!IsLayoutPaused)
-			// {
-			// 	StartChildLoop();
-			// 	Control prevChild = null;
-			// 	for (int i = 0; i < children.Count; i++)
-			// 	{
-			// 		var child = children[i];
-			// 		child.Transform.LayoutData = new TransformLayoutData(i, children.Count, prevChild);
-			// 		child.Invalidate();
+			Invalidate(true);
+		}
 
-			// 		prevChild = child;
-			// 	}
-			// 	EndChildLoop();
-			// }
-
+		public void Invalidate(bool relayout)
+		{
 			base.Invalidate();
 
-			if (!IsLayoutPaused)
+			if (relayout && !IsLayoutPaused && hasPrevMaxSize)
 			{
 				ReLayoutChildren();
 			}
@@ -148,6 +140,7 @@ namespace FlatAppStore.UI.Framework
 			EndChildLoop();
 		}
 
+		private bool hasPrevMaxSize = false;
 		private Vector2 prevMaxSize = Vector2.Zero;
 		private Vector2 prevSize = Vector2.Zero;
 
@@ -158,24 +151,27 @@ namespace FlatAppStore.UI.Framework
 			StartChildLoop();
 			var size = LayoutChildrenAndGetSize(maxSize);
 			prevSize = size;
+			hasPrevMaxSize = true;
 			EndChildLoop();
 
 			return size;
 		}
 		public void ReLayoutChildren()
 		{
-			StartChildLoop();
-			var size = LayoutChildrenAndGetSize(prevMaxSize);
-			EndChildLoop();
+			if (!IsLayoutPaused)
+			{
+				StartChildLoop();
+				var size = LayoutChildrenAndGetSize(prevMaxSize);
+				EndChildLoop();
 
-			if (prevSize != size) Parent.ReLayoutChildren(); // We will have to relayout everything because our size changed
-															 //Invalidate();
+				if (prevSize != size) Parent.ReLayoutChildren(); // We will have to relayout everything because our size changed
+				Invalidate(false);
+			}
 		}
 		protected abstract Vector2 LayoutChildrenAndGetSize(Vector2 maxSize);
 
 		protected void SetChildLocalBounds(Control child, Rectangle bounds)
 		{
-			//child.Transform.UpdateTransform(bounds);
 			child.Transform.LocalBounds = bounds;
 		}
 
@@ -190,14 +186,25 @@ namespace FlatAppStore.UI.Framework
 			EndChildLoop();
 		}
 
+
+		private Control inputAbsorber;
+
 		public override void OnInput(ControllerButton button)
 		{
 			base.OnInput(button);
 
 			StartChildLoop();
 			foreach (var child in Children)
-				child.OnInput(button);
+				if (inputAbsorber == null || child == inputAbsorber) // If we have an input absorber, make sure we are that absorber
+					child.OnInput(button);
 			EndChildLoop();
+
+			inputAbsorber = null;
+		}
+
+		public void AbsorbNextInput(Control control)
+		{
+			if (Children.Contains(control)) inputAbsorber = control;
 		}
 
 		private readonly Queue<Action> onEndChildloopQueue = new Queue<Action>();

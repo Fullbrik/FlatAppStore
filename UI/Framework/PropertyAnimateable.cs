@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 
 namespace FlatAppStore.UI.Framework
 {
@@ -6,8 +7,11 @@ namespace FlatAppStore.UI.Framework
 	{
 		public Tween<T> AnimateProperty<T>(string name)
 		{
-			var prop = GetType().GetProperty(name);
+			var type = GetType();
 
+			var prop = GetType().GetProperty(name) ?? GetType().GetProperty(name, BindingFlags.NonPublic);
+
+			if (prop == null) throw new Exception($"Property {name} could not be found.");
 			if (prop.PropertyType != typeof(T)) throw new Exception($"Property {name} is not of type {typeof(T).Name}");
 
 			return AnimateProperty<T>((T)prop.GetValue(this), (value) => prop.SetValue(this, value));

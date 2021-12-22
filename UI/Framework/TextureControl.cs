@@ -59,28 +59,5 @@ namespace FlatAppStore.UI.Framework
 					return new Vector2(Texture.width, Texture.height);
 			}
 		}
-
-		// private Rectangle GetScaledBounds()
-		// {
-		// 	return ScaleMode switch
-		// 	{
-		// 		TextureScaleMode.FitHeight => new Rectangle(Transform.Bounds.x, Transform.Bounds.y, Texture.width * (Parent.Transform.Bounds.height / Texture.height), Parent.Transform.Bounds.height),
-		// 		TextureScaleMode.None or _ => Transform.Bounds
-		// 	};
-		// }
-
-		// public override Vector2 GetMinPreferredSize()
-		// {
-		// 	float scale = ScaleMode switch
-		// 	{
-		// 		TextureScaleMode.FitWidth => Transform.Bounds.width != 0 ? Parent.Transform.Bounds.width / Texture.width : 1,
-		// 		TextureScaleMode.FitHeight => Parent.Transform.Bounds.height / Texture.height,
-		// 		TextureScaleMode.None or _ => 1
-		// 	};
-
-		// 	System.Console.WriteLine("Scale: Width: {0}, Height: {1}", Texture.width * scale, Texture.height * scale);
-
-		// 	return new Vector2(Texture.width, Texture.height);
-		// }
 	}
 }

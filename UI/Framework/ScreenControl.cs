@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using Raylib_cs;
 
 namespace FlatAppStore.UI.Framework
 {
@@ -16,10 +17,19 @@ namespace FlatAppStore.UI.Framework
 		public override bool PerferExpandToParentWidth => true;
 		public override bool PerferExpandToParentHeight => true;
 
+		public abstract Color Background { get; }
+
 		protected void AddAction(ControllerButton button, string name, Action action)
 		{
 			actionNames.Add(button, name);
 			actionButtons.Add(button, action);
+		}
+
+		public override void Draw()
+		{
+			Raylib.DrawRectangleRec(Transform.DrawBounds, Background); // Draw background
+
+			base.Draw();
 		}
 
 		public override void OnInput(ControllerButton button)

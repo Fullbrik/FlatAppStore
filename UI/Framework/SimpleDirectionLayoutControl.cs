@@ -19,16 +19,16 @@ namespace FlatAppStore.UI.Framework
 		Stretch
 	}
 
-	public class SimpleDirectionLayoutControl : LayoutControl
+	public class SimpleDirectionLayoutControl : LayoutControl, IFocusLayoutProvider
 	{
 		public LayoutDirection LayoutDirection { get; set; }
+		public CrossAxisAlignment DefaultCrossAxisAlignment { get; set; } = CrossAxisAlignment.Begin;
 
-		// Will evaluate to check if we want to expand vertically (in which case we will fill the width) or we want to fill the main axis
-		public override bool PerferExpandToParentWidth => LayoutDirection == LayoutDirection.Vertical || perferExpandMainAxis;
+		public override bool PerferExpandToParentWidth => perferExpandHorizontal;
 
-		public override bool PerferExpandToParentHeight => LayoutDirection == LayoutDirection.Horizontal || perferExpandMainAxis;
+		public override bool PerferExpandToParentHeight => perferExpandVertical;
 
-		private bool perferExpandMainAxis;
+		private bool perferExpandHorizontal, perferExpandVertical;
 
 		public SimpleDirectionLayoutControl() { }
 
@@ -40,12 +40,13 @@ namespace FlatAppStore.UI.Framework
 
 		protected override Transform CreateTransform(Control control)
 		{
-			return new SimpleDirectionLayoutControlTransform(control);
+			return new SimpleDirectionLayoutControlTransform(control, DefaultCrossAxisAlignment);
 		}
 
 		protected override Vector2 LayoutChildrenAndGetSize(Vector2 maxSize)
 		{
-			perferExpandMainAxis = false;
+			perferExpandHorizontal = false;
+			perferExpandVertical = false;
 
 			// Get a count of all the children that want to expand on the main axis
 			int expandedChildrenCount = Children.Where((child) => LayoutDirection switch
@@ -63,6 +64,9 @@ namespace FlatAppStore.UI.Framework
 				var childSize = child.GetSize(maxSize);
 				controlAndSize.Add(child, childSize);
 
+				if (child.PerferExpandToParentWidth) perferExpandHorizontal = true;
+				if (child.PerferExpandToParentHeight) perferExpandVertical = true;
+
 				switch (LayoutDirection)
 				{
 					case LayoutDirection.Horizontal:
@@ -77,7 +81,8 @@ namespace FlatAppStore.UI.Framework
 			}
 
 			Control prevChild = null;
-			float currentMainAxisSize = 0;
+			float currentWidth = 0;
+			float currentHeight = 0;
 			foreach (var child in Children)
 			{
 				float x = 0;
@@ -96,7 +101,9 @@ namespace FlatAppStore.UI.Framework
 						if (prevChild != null) // If there are not previous children, we are the starting one
 							x = prevChild.Transform.LocalBounds.x + prevChild.Transform.LocalBounds.width;
 
-						currentMainAxisSize = x + width;
+						currentWidth = x + width;
+
+						if (childSize.Y > currentHeight) currentHeight = childSize.Y;
 						break;
 					case LayoutDirection.Vertical:
 						GetLayoutValuesForChild(child, child.PerferExpandToParentHeight, expandedChildrenCount, childSize.Y, childSize.X, maxSize.Y, maxSize.X, totalNonFillerSize, out x, out height, out width);
@@ -104,7 +111,8 @@ namespace FlatAppStore.UI.Framework
 						if (prevChild != null) // If there are not previous children, we are the starting one
 							y = prevChild.Transform.LocalBounds.y + prevChild.Transform.LocalBounds.height;
 
-						currentMainAxisSize = y + height;
+						currentHeight = y + height;
+						if (childSize.X > currentWidth) currentWidth = childSize.X;
 						break;
 					default: // If there is an error, just have the child fill out as much as possible
 						width = childSize.X;
@@ -117,27 +125,12 @@ namespace FlatAppStore.UI.Framework
 				prevChild = child;
 			}
 
-			if (expandedChildrenCount > 0)
-			{
-				perferExpandMainAxis = true;
-				return maxSize;
-			}
-			else
-			{
-				return LayoutDirection switch
-				{
-					LayoutDirection.Horizontal => new Vector2(currentMainAxisSize, maxSize.Y),
-					LayoutDirection.Vertical => new Vector2(maxSize.X, currentMainAxisSize),
-					_ => maxSize // If there is an error, just fill the parent
-				};
-			}
+			return new Vector2(currentWidth, currentHeight);
 		}
 
 		private void GetLayoutValuesForChild(Control child, bool expandMainAxis, int expandedChildrenCount, float preferredMainAxis, float preferredCrossAxis, float parentMainAxisSize, float parentCrossAxisSize, float totalNonFillerSize, out float crossAxisPos, out float mainAxisSize, out float crossAxisSize)
 		{
 			crossAxisPos = 0;
-
-
 
 			if (expandMainAxis)
 			{
@@ -170,53 +163,113 @@ namespace FlatAppStore.UI.Framework
 				}
 			}
 		}
+
+		public FocusableUserControl FocusGetFirst()
+		{
+			for (int i = 0; i < Children.Count; i++)
+			{
+				if (Children[i] is FocusableUserControl child) return child;
+			}
+
+			return null;
+		}
+
+		public FocusableUserControl FocusGetRight(FocusableUserControl focusableUserControl)
+		{
+			if (LayoutDirection == LayoutDirection.Horizontal)
+			{
+				int index = Children.IndexOf(focusableUserControl);
+
+				if (index < 0) throw new System.Exception("Cannot find next widget because the current on isn't in this collection");
+
+				for (int i = index + 1; i != index; i++) // Move to the right, starting at the next index. If we get back to the index, then return null because we couldn't find anything.
+				{
+					if (i >= Children.Count)
+						i = 0; // If we reach the furthest right, loop back around
+
+					if (Children[i] is FocusableUserControl child)
+						return child;
+				}
+
+				return null;
+			}
+
+			return null; // TODO: Move focus check to another widget
+		}
+
+		public FocusableUserControl FocusGetLeft(FocusableUserControl focusableUserControl)
+		{
+			if (LayoutDirection == LayoutDirection.Horizontal)
+			{
+				int index = Children.IndexOf(focusableUserControl);
+
+				if (index < 0) throw new System.Exception("Cannot find next widget because the current on isn't in this collection");
+
+				for (int i = index - 1; i != index; i--) // Move to the left, starting at the next index. If we get back to the index, then return null because we couldn't find anything.
+				{
+					if (i < 0) i = Children.Count - 1; // If we reach the furthest left, loop back around
+
+					if (Children[i] is FocusableUserControl child) return child;
+				}
+
+				return null;
+			}
+
+			return null; // TODO: Move focus check to another widget
+		}
+
+		public FocusableUserControl FocusGetUp(FocusableUserControl focusableUserControl)
+		{
+			if (LayoutDirection == LayoutDirection.Vertical)
+			{
+				int index = Children.IndexOf(focusableUserControl);
+
+				if (index < 0) throw new System.Exception("Cannot find next widget because the current on isn't in this collection");
+
+				for (int i = index - 1; i != index; i--) // Move up, starting at the next index. If we get back to the index, then return null because we couldn't find anything.
+				{
+					if (i < 0) i = Children.Count - 1; // If we reach the furthest up, loop back around
+
+					if (Children[i] is FocusableUserControl child) return child;
+				}
+
+				return null;
+			}
+
+			return null; // TODO: Move focus check to another widget
+		}
+
+		public FocusableUserControl FocusGetDown(FocusableUserControl focusableUserControl)
+		{
+			if (LayoutDirection == LayoutDirection.Vertical)
+			{
+				int index = Children.IndexOf(focusableUserControl);
+
+				if (index < 0) throw new System.Exception("Cannot find next widget because the current on isn't in this collection");
+
+				for (int i = index + 1; i != index; i++) // Move down, starting at the next index. If we get back to the index, then return null because we couldn't find anything.
+				{
+					if (i >= Children.Count)
+						i = 0; // If we reach the furthest down, loop back around
+
+					if (Children[i] is FocusableUserControl child)
+						return child;
+				}
+
+				return null;
+			}
+
+			return null; // TODO: Move focus check to another widget
+		}
 	}
 
 	public class SimpleDirectionLayoutControlTransform : Transform
 	{
 		public CrossAxisAlignment CrossAxisAlignment { get; set; }
 
-		public SimpleDirectionLayoutControlTransform(Control control) : base(control)
+		public SimpleDirectionLayoutControlTransform(Control control, CrossAxisAlignment crossAxisAlignment) : base(control)
 		{
+			CrossAxisAlignment = crossAxisAlignment;
 		}
-
-		/*protected override Raylib_cs.Rectangle GetLocalBounds()
-		{
-			float x = 0;
-			float y = 0;
-
-			float width = 0;
-			float height = 0;
-
-			switch (LayoutControl.LayoutDirection)
-			{
-				case LayoutDirection.Vertical:
-					width = ParentTransform.Bounds.width;
-
-					if (Control.PerferExpandToParent)
-						height // If we want to expand, we expand to fill available space. This space is divided evenly for all controls that want this.
-							= (ParentTransform.Bounds.height - LayoutControl.GetMinPreferredSize().Y) // Get remaining space
-								/ LayoutControl.ControlsThatPerferToExpandToParent.Count; // And divide it evenly
-					else
-						height = Control.GetMinPreferredSize().Y;
-
-					if (LayoutData.prevChild != null) // If there are not previous children, we are the starting one
-						y = LayoutData.prevChild.Transform.LocalBounds.y + LayoutData.prevChild.Transform.LocalBounds.height;
-
-					break;
-				case LayoutDirection.Horizontal:
-					var preferredSize = Control.PerferExpandToParent ? Vector2.Zero : Control.GetMinPreferredSize();
-
-					GetLayoutValues(preferredSize.X, preferredSize.Y, ParentTransform.Bounds.width, ParentTransform.Bounds.height, LayoutControl.GetMinPreferredSize().X, out x, out y, out width, out height);
-
-					if (LayoutData.prevChild != null) // If there are not previous children, we are the starting one
-						x = LayoutData.prevChild.Transform.LocalBounds.x + LayoutData.prevChild.Transform.LocalBounds.width;
-					break;
-				default:
-					throw new System.Exception("Invalid layout direction.");
-			}
-
-			return new Raylib_cs.Rectangle(x, y, width, height);
-		}*/
 	}
 }

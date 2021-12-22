@@ -48,10 +48,5 @@ namespace FlatAppStore.UI.Framework
 		{
 			return Raylib.MeasureTextEx(Raylib.GetFontDefault(), Text, FontSize, FontSize / 10);
 		}
-
-		// public override Vector2 GetMinPreferredSize()
-		// {
-		// 	return Raylib.MeasureTextEx(Raylib.GetFontDefault(), Text, FontSize, FontSize / 10);
-		// }
 	}
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using FlatAppStore.UI.Framework.Assets;
 using Raylib_cs;
 
 namespace FlatAppStore.UI.Framework
@@ -22,14 +23,9 @@ namespace FlatAppStore.UI.Framework
 			Root = new RootControl(this);
 		}
 
-		public void Run(/*float targetScale,/*int targetWidth, int targetHeight, CanvasScaleDirection scaleDirection, */ Control starting)
+		public void Run(Control starting)
 		{
 			Initialize();
-
-			//Canvas.TargetResolution = targetScale;
-			// Canvas.TargetWidth = targetWidth;
-			// Canvas.TargetHeight = targetHeight;
-			// Canvas.ScaleDirection = scaleDirection;
 
 			Navigator.AddChild(starting);
 
@@ -42,12 +38,18 @@ namespace FlatAppStore.UI.Framework
 		{
 			InitializeWindow();
 			InitializeDrivers();
+			LoadAssets();
 			InitializeControls();
 		}
 
-		public void InitializeDrivers()
+		private void InitializeDrivers()
 		{
 			InputManager.LoadInputDriver(new KeyboardInputDriver());
+		}
+
+		private void LoadAssets()
+		{
+			Icons.LoadIcons();
 		}
 
 		private void InitializeControls()
@@ -70,6 +72,7 @@ namespace FlatAppStore.UI.Framework
 		private void DoEngineLoop()
 		{
 			// Relayout the root widget
+			Root.IsLayoutReady = true;
 			Root.GetSize(new Vector2(Raylib.GetScreenWidth(), Raylib.GetScreenHeight()));
 			Root.Invalidate();
 
@@ -90,7 +93,7 @@ namespace FlatAppStore.UI.Framework
 
 				//Raylib_cs.Raylib.DrawRectangleLinesEx(control.Transform.DrawBounds, 5, Raylib_cs.Color.DARKGREEN);
 
-				Raylib.DrawFPS(10, 10);
+				//Raylib.DrawFPS(10, 10);
 				Raylib.EndDrawing();
 
 				Updateables.UpdateAll(Raylib.GetFrameTime());
@@ -127,6 +130,7 @@ namespace FlatAppStore.UI.Framework
 				}
 
 				InputManager.Dispose();
+				Icons.UnloadIcons();
 				// TODO: set large fields to null
 				disposedValue = true;
 			}
