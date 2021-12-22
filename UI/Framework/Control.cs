@@ -25,8 +25,6 @@ namespace FlatAppStore.UI.Framework
 
 			Initialized();
 
-			//IsInitialized = true;
-
 			Invalidate();
 		}
 

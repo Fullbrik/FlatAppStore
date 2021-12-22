@@ -187,8 +187,7 @@ namespace FlatAppStore.UI.Framework
 					if (i >= Children.Count)
 						i = 0; // If we reach the furthest right, loop back around
 
-					if (Children[i] is FocusableUserControl child)
-						return child;
+					if (Children[i] is FocusableUserControl child) return child;
 				}
 
 				return null;
