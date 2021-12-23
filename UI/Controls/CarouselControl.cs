@@ -1,128 +1,149 @@
 using Raylib_cs;
 using FlatAppStore.UI.Framework;
 using System.Numerics;
+using System;
 
 namespace FlatAppStore.UI.Controls
 {
-	public class CarouselControl : UserControl, IFocusLayoutProvider
-	{
-		public string Title { get; set; } = "";
-		public Color BackgroundColor { get; set; } = new Color(35, 38, 46, 255);
+    public class CarouselControl : UserControl, IFocusLayoutProvider
+    {
+        public string Title { get; set; } = "";
+        public Color BackgroundColor { get; set; } = new Color(0, 0, 0, 0);
 
-		public override bool PerferExpandToParentWidth => true;
+        public override bool PerferExpandToParentWidth => true;
 
-		private ScrollLayoutControl carouselPartsScroll;
-		private SimpleDirectionLayoutControl carouselPartsLayout;
+        private ScrollLayoutControl carouselPartsScroll;
+        private SimpleDirectionLayoutControl carouselPartsLayout = new SimpleDirectionLayoutControl(LayoutDirection.Horizontal);
 
-		public CarouselControl() { }
+        public CarouselControl() { }
 
-		public CarouselControl(string title)
-		{
-			Title = title;
-		}
+        public CarouselControl(string title)
+        {
+            Title = title;
+        }
 
-		public CarouselControl(string title, Color backgroundColor)
-		{
-			Title = title;
-			BackgroundColor = backgroundColor;
-		}
+        public CarouselControl(string title, Color backgroundColor)
+        {
+            Title = title;
+            BackgroundColor = backgroundColor;
+        }
 
-		public FocusableUserControl FocusGetDown(FocusableUserControl focusableUserControl)
-		{
-			return carouselPartsLayout.FocusGetDown(focusableUserControl);
-		}
+        public void BindChildGetFocus(Action<FocusableUserControl> onGetFocus)
+        {
+            carouselPartsLayout.ChildGetFocus += onGetFocus;
+        }
 
-		public FocusableUserControl FocusGetFirst()
-		{
-			return carouselPartsLayout.FocusGetFirst();
-		}
+        public IFocusLayoutProvider FocusProviderUp { get => carouselPartsLayout?.FocusProviderUp; set => carouselPartsLayout.FocusProviderUp = value; }
+        public IFocusLayoutProvider FocusProviderDown { get => carouselPartsLayout?.FocusProviderDown; set => carouselPartsLayout.FocusProviderDown = value; }
+        public IFocusLayoutProvider FocusProviderLeft { get => carouselPartsLayout?.FocusProviderLeft; set => carouselPartsLayout.FocusProviderLeft = value; }
+        public IFocusLayoutProvider FocusProviderRight { get => carouselPartsLayout?.FocusProviderRight; set => carouselPartsLayout.FocusProviderRight = value; }
 
-		public FocusableUserControl FocusGetLeft(FocusableUserControl focusableUserControl)
-		{
-			return carouselPartsLayout.FocusGetLeft(focusableUserControl);
-		}
+        public FocusableUserControl FocusGetDown(FocusableUserControl focusableUserControl)
+        {
+            return carouselPartsLayout.FocusGetDown(focusableUserControl);
+        }
 
-		public FocusableUserControl FocusGetRight(FocusableUserControl focusableUserControl)
-		{
-			return carouselPartsLayout.FocusGetRight(focusableUserControl);
-		}
+        public FocusableUserControl FocusGetFirst()
+        {
+            return carouselPartsLayout.FocusGetFirst();
+        }
 
-		public FocusableUserControl FocusGetUp(FocusableUserControl focusableUserControl)
-		{
-			return carouselPartsLayout.FocusGetUp(focusableUserControl);
-		}
+        public FocusableUserControl FocusGetLeft(FocusableUserControl focusableUserControl)
+        {
+            return carouselPartsLayout.FocusGetLeft(focusableUserControl);
+        }
 
-		protected override Control Build()
-		{
-			var control = new SimpleDirectionLayoutControl(LayoutDirection.Vertical);
+        public FocusableUserControl FocusGetRight(FocusableUserControl focusableUserControl)
+        {
+            return carouselPartsLayout.FocusGetRight(focusableUserControl);
+        }
 
-			// Make room for header
-			control.AddChild(new SpacerControl(0, 50));
+        public FocusableUserControl FocusGetUp(FocusableUserControl focusableUserControl)
+        {
+            return carouselPartsLayout.FocusGetUp(focusableUserControl);
+        }
 
-			// Add title and its padding
-			control.AddChild(new PaddingControl(new LabelControl(Title, Color.WHITE), 10, 10, 0, 0));
+        public void OnChildGetFocus(FocusableUserControl control)
+        {
+            carouselPartsLayout.OnChildGetFocus(control);
+        }
 
-			// Create the scroller
-			carouselPartsScroll = new ScrollLayoutControl(LayoutDirection.Horizontal);
+        public void Focus()
+        {
+            // Focus the first one
+            carouselPartsLayout.FocusGetFirst()?.Focus();
+        }
 
-			// Build carousel parts
-			carouselPartsLayout = new SimpleDirectionLayoutControl(LayoutDirection.Horizontal);
+        protected override Control Build()
+        {
+            var control = new SimpleDirectionLayoutControl(LayoutDirection.Vertical);
 
-			carouselPartsLayout.AddChild(new TestFocusControl(Color.BROWN));
-			carouselPartsLayout.AddChild(new SpacerControl(10, 0));
-			carouselPartsLayout.AddChild(new TestFocusControl(Color.ORANGE));
-			carouselPartsLayout.AddChild(new SpacerControl(10, 0));
-			carouselPartsLayout.AddChild(new TestFocusControl(Color.BLUE));
-			carouselPartsLayout.AddChild(new SpacerControl(10, 0));
-			carouselPartsLayout.AddChild(new TestFocusControl(Color.DARKPURPLE));
+            // Make room for header
+            //control.AddChild(new SpacerControl(0, 50));
 
-			// Focus the first one
-			carouselPartsLayout.FocusGetFirst()?.Focus();
+            // Add title and its padding
+            control.AddChild(new PaddingControl(new LabelControl(Title, Color.WHITE), 10, 10, 20, 20));
 
-			// Add it to the scroll
-			carouselPartsScroll.AddChild(carouselPartsLayout);
+            // Create the scroller
+            carouselPartsScroll = new ScrollLayoutControl(LayoutDirection.Horizontal);
 
-			// Add the scroll
-			control.AddChild(carouselPartsScroll);
+            // Build carousel parts
+            carouselPartsLayout.RemoveAllChildren();
 
-			// and return
-			return new PaddingControl(control, 0, 20, 10, 10);
-		}
+            carouselPartsLayout.AddChild(new SpacerControl(20, 0));
+            carouselPartsLayout.AddChild(new TestFocusControl(Color.BROWN));
+            carouselPartsLayout.AddChild(new SpacerControl(10, 0));
+            carouselPartsLayout.AddChild(new TestFocusControl(Color.ORANGE));
+            carouselPartsLayout.AddChild(new SpacerControl(10, 0));
+            carouselPartsLayout.AddChild(new TestFocusControl(Color.BLUE));
+            carouselPartsLayout.AddChild(new SpacerControl(10, 0));
+            carouselPartsLayout.AddChild(new TestFocusControl(Color.DARKPURPLE));
+            carouselPartsLayout.AddChild(new SpacerControl(20, 0));
 
-		public override void Draw()
-		{
-			Raylib.DrawRectangleGradientEx(new Rectangle(Transform.DrawBounds.x, Transform.DrawBounds.y + 10, Transform.DrawBounds.width, Transform.DrawBounds.height + 30), Raylib_cs.Color.BLACK, new Raylib_cs.Color(0, 0, 0, 0), new Raylib_cs.Color(0, 0, 0, 0), Raylib_cs.Color.BLACK); // Draw shaddow
-			Raylib.DrawRectangleRec(Transform.DrawBounds, BackgroundColor); // Draw background
+            // Add it to the scroll
+            carouselPartsScroll.AddChild(carouselPartsLayout);
 
-			base.Draw();
+            // Add the scroll
+            control.AddChild(carouselPartsScroll);
 
-			if (carouselPartsScroll != null)
-			{
-				// Draw left cover
-				if (carouselPartsScroll.HorizontalScroll > 0)
-				{
-					// Draw solid part
-					Raylib.DrawRectangle((int)Transform.DrawBounds.x, (int)carouselPartsScroll.Transform.DrawBounds.y, 10, (int)carouselPartsScroll.Transform.DrawBounds.height, BackgroundColor);
+            // and return
+            return new PaddingControl(control, 10, 10, 0, 0);
+        }
 
-					// Draw shaddow
-					Raylib.DrawRectangleGradientH((int)Transform.DrawBounds.x + 10, (int)carouselPartsScroll.Transform.DrawBounds.y, 5, (int)carouselPartsScroll.Transform.DrawBounds.height, BackgroundColor, new Color(0, 0, 0, 0));
-				}
+        public override void Draw()
+        {
+            Raylib.DrawRectangleGradientEx(new Rectangle(Transform.DrawBounds.x, Transform.DrawBounds.y + 10, Transform.DrawBounds.width, Transform.DrawBounds.height + 30), Raylib_cs.Color.BLACK, new Raylib_cs.Color(0, 0, 0, 0), new Raylib_cs.Color(0, 0, 0, 0), Raylib_cs.Color.BLACK); // Draw shaddow
+            Raylib.DrawRectangleRec(Transform.DrawBounds, BackgroundColor); // Draw background
 
-				// Draw right cover
-				if (carouselPartsScroll.HorizontalScroll < carouselPartsScroll.MaxHorizontalScroll)
-				{
-					// Draw solid part
-					Raylib.DrawRectangle((int)(carouselPartsScroll.Transform.DrawBounds.x + carouselPartsScroll.Transform.DrawBounds.width), (int)carouselPartsScroll.Transform.DrawBounds.y, 10, (int)carouselPartsScroll.Transform.DrawBounds.height, BackgroundColor);
+            base.Draw();
 
-					// Draw shaddow
-					Raylib.DrawRectangleGradientH((int)(carouselPartsScroll.Transform.DrawBounds.x + carouselPartsScroll.Transform.DrawBounds.width - 5), (int)carouselPartsScroll.Transform.DrawBounds.y, 5, (int)carouselPartsScroll.Transform.DrawBounds.height, new Color(0, 0, 0, 0), BackgroundColor);
-				}
-			}
-		}
+            // if (carouselPartsScroll != null)
+            // {
+            //     // Draw left cover
+            //     if (carouselPartsScroll.HorizontalScroll > 0)
+            //     {
+            //         // Draw solid part
+            //         Raylib.DrawRectangle((int)Transform.DrawBounds.x, (int)carouselPartsScroll.Transform.DrawBounds.y, 15, (int)carouselPartsScroll.Transform.DrawBounds.height, BackgroundColor);
 
-		public override Vector2 GetSize(Vector2 maxSize)
-		{
-			return new Vector2(maxSize.X, base.GetSize(maxSize).Y);
-		}
-	}
+            //         // Draw shaddow
+            //         Raylib.DrawRectangleGradientH((int)Transform.DrawBounds.x + 10, (int)carouselPartsScroll.Transform.DrawBounds.y, 5, (int)carouselPartsScroll.Transform.DrawBounds.height, BackgroundColor, new Color(0, 0, 0, 0));
+            //     }
+
+            //     // Draw right cover
+            //     if (carouselPartsScroll.HorizontalScroll < carouselPartsScroll.MaxHorizontalScroll)
+            //     {
+            //         // Draw solid part
+            //         Raylib.DrawRectangle((int)(carouselPartsScroll.Transform.DrawBounds.x + carouselPartsScroll.Transform.DrawBounds.width), (int)carouselPartsScroll.Transform.DrawBounds.y, 15, (int)carouselPartsScroll.Transform.DrawBounds.height, BackgroundColor);
+
+            //         // Draw shaddow
+            //         Raylib.DrawRectangleGradientH((int)(carouselPartsScroll.Transform.DrawBounds.x + carouselPartsScroll.Transform.DrawBounds.width - 5), (int)carouselPartsScroll.Transform.DrawBounds.y, 5, (int)carouselPartsScroll.Transform.DrawBounds.height, new Color(0, 0, 0, 0), BackgroundColor);
+            //     }
+            // }
+        }
+
+        public override Vector2 GetSize(Vector2 maxSize)
+        {
+            return new Vector2(maxSize.X, base.GetSize(maxSize).Y);
+        }
+    }
 }
