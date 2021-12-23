@@ -49,6 +49,7 @@ namespace FlatAppStore.UI.Framework
 
 		private void LoadAssets()
 		{
+			Localization.LocalizationManager.LoadLanguages();
 			Icons.LoadIcons();
 		}
 

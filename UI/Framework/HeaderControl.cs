@@ -13,7 +13,7 @@ namespace FlatAppStore.UI.Framework
 			control.DefaultCrossAxisAlignment = CrossAxisAlignment.Center;
 
 			control.AddChild(new PaddingControl(new TextureControl(Icons.Search) { ScaleMode = TextureScaleMode.FitHeight }, 10, 10, 10, 10));
-			control.AddChild(new LabelControl("Search for applications or anything else...", SearchTextColor));
+			control.AddChild(new LabelControl("#search", SearchTextColor));
 
 			control.AddChild(new FillerControl());
 

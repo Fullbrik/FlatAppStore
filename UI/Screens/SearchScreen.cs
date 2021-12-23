@@ -5,14 +5,14 @@ namespace FlatAppStore.UI.Screens
 {
 	public class SearchScreen : ScreenControl
 	{
-		public override string Title => "Search";
+		public override string Title => "#screen_title_search";
 
 		public override Color Background => background;
 		Color background = new Color(11, 19, 28, 255);
 
 		protected override Control Build()
 		{
-			AddAction(ControllerButton.Face_Right, "Back", () => RemoveFromParent());
+			AddAction(ControllerButton.Face_Right, "#action_back", () => RemoveFromParent());
 
 			var layout = new SimpleDirectionLayoutControl(LayoutDirection.Vertical);
 

@@ -18,8 +18,9 @@ namespace FlatAppStore.UI.Framework
 			if (CurrentDriver == null) CurrentDriver = inputDriver;
 		}
 
-		public void CheckInput(Action<ControllerButton> onKeyDown)
+		public void CheckInput(Action<ControllerButton> onKeyDown, Action<float> onScroll)
 		{
+			// Check for controller input
 			var inputsAndDrivers = inputDrivers.Select((driver) => (driver, driver.GetButtonsDown()));
 
 			CurrentDriver = inputsAndDrivers.Last().driver; // Extract the last input device to set as current one.
@@ -30,6 +31,10 @@ namespace FlatAppStore.UI.Framework
 			{
 				onKeyDown(input);
 			}
+
+			// Check for scroll wheel
+			float scrollAmount = Raylib_cs.Raylib.GetMouseWheelMove();
+			if (scrollAmount != 0) onScroll(scrollAmount);
 		}
 
 		protected virtual void Dispose(bool disposing)

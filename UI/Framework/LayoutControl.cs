@@ -207,6 +207,17 @@ namespace FlatAppStore.UI.Framework
 			if (Children.Contains(control)) inputAbsorber = control;
 		}
 
+		public override void OnScroll(float amount)
+		{
+			base.OnScroll(amount);
+
+			StartChildLoop();
+			foreach (var child in Children)
+				if (inputAbsorber == null)
+					child.OnScroll(amount);
+			EndChildLoop();
+		}
+
 		private readonly Queue<Action> onEndChildloopQueue = new Queue<Action>();
 		bool isInChildLoop = false;
 

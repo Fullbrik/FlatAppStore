@@ -50,5 +50,6 @@ namespace FlatAppStore.UI.Framework
 		}
 
 		public virtual void OnInput(ControllerButton button) { }
+		public virtual void OnScroll(float amount) { }
 	}
 }

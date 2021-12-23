@@ -21,7 +21,7 @@ namespace FlatAppStore.UI.Framework
 		public void Update(float deltaTime)
 		{
 			// Check for input
-			InputManager.CheckInput(OnInput);
+			InputManager.CheckInput(OnInput, OnScroll);
 		}
 
 		protected override Transform CreateTransform(Control control)

@@ -24,6 +24,12 @@ namespace FlatAppStore.UI.Framework
 			Color = color;
 		}
 
+		public RectControl(Vector2 size, Color color)
+		{
+			this.size = size;
+			Color = color;
+		}
+
 		public override void Draw()
 		{
 			Raylib.DrawRectangleRec(Transform.DrawBounds, Color);

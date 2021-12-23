@@ -1,0 +1,21 @@
+	Application specific strings
+#application_title=STORE
+
+	Framework strings
+#search=Search for applications or anything else...
+#loading=Loading...
+
+	Screen titles
+#screen_title_startup=Startup
+#screen_title_search=Search
+
+	Actions
+#action_select=Select
+#action_back=Back
+
+	Other strings
+#category_music_and_video=Music & Video
+#category_communication=Communication
+#category_productivity=Productivity
+
+#popular_apps=Popular apps

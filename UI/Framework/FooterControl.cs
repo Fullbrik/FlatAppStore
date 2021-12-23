@@ -7,7 +7,7 @@ namespace FlatAppStore.UI.Framework
 	public class FooterControl : UserControl
 	{
 		public string PageTitle { get => pageTitleLabel.Text; set => pageTitleLabel.Text = value; }
-		private LabelControl pageTitleLabel = new LabelControl("Loading...", Raylib_cs.Color.WHITE);
+		private LabelControl pageTitleLabel;
 
 		public IReadOnlyDictionary<ControllerButton, string> ActionNames
 		{
@@ -30,13 +30,15 @@ namespace FlatAppStore.UI.Framework
 			AddChild(new GradientRectControl(new Raylib_cs.Color(0, 0, 0, 0), Raylib_cs.Color.BLACK, Raylib_cs.Color.BLACK, new Raylib_cs.Color(0, 0, 0, 0)) { ExpandToParent = true }, (t) => { t.OffsetY = -5; t.OffsetHeight = -30; }); // Add Shaddow
 			AddChild(new RectControl(Raylib_cs.Color.BLACK) { ExpandToParent = true }); // Add background
 
+			if (pageTitleLabel == null) pageTitleLabel = new LabelControl("#loading", Raylib_cs.Color.WHITE);
+
 			var control = new SimpleDirectionLayoutControl(LayoutDirection.Horizontal);
 
 			control.AddChild(
 				new PaddingControl(
 					new RoundedRectContainerControl(
 						new PaddingControl(
-							new LabelControl("STORE", Raylib_cs.Color.BLACK),
+							new LabelControl("#application_title", Raylib_cs.Color.BLACK),
 							5, 5, 15, 15
 						),
 						new Vector2(1, 1)

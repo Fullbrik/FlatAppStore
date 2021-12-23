@@ -30,6 +30,16 @@ namespace FlatAppStore.UI.Framework
 			TopRight = topRight;
 		}
 
+		public GradientRectControl(Vector2 size, Color topLeft, Color bottomLeft, Color bottomRight, Color topRight)
+		{
+			this.size = size;
+
+			TopLeft = topLeft;
+			BottomLeft = bottomLeft;
+			BottomRight = bottomRight;
+			TopRight = topRight;
+		}
+
 		public override void Draw()
 		{
 			Raylib.DrawRectangleGradientEx(Transform.DrawBounds, TopLeft, BottomLeft, BottomRight, TopRight);

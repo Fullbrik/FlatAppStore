@@ -16,6 +16,7 @@ namespace FlatAppStore.UI.Framework
 		private static Tween<T> CreateTweenFor<T>(T initial)
 		{
 			if (initial is float f) return new FloatTween(f) as Tween<T>;
+			else if (initial is int i) return new IntTween(i) as Tween<T>;
 			else if (initial is Rectangle r) return new RectangleTween(r) as Tween<T>;
 			else throw new Exception("No tween available for type " + typeof(T).Name);
 		}
@@ -155,8 +156,18 @@ namespace FlatAppStore.UI.Framework
 		{
 			Current = LerpF(Initial, Target);
 		}
+	}
 
+	public class IntTween : Tween<int>
+	{
+		public IntTween(int start) : base(start)
+		{
+		}
 
+		protected override void DoLerp()
+		{
+			Current = (int)LerpF(Initial, Target);
+		}
 	}
 
 	public class RectangleTween : Tween<Rectangle>
