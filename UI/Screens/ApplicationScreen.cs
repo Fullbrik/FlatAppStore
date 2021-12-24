@@ -5,37 +5,46 @@ using Raylib_cs;
 
 namespace FlatAppStore.UI.Screens
 {
-	public class ApplicationScreen : ScreenControl
-	{
-		public override string Title => "#screen_title_application";
+    public class ApplicationScreen : ScreenControl
+    {
+        public override string Title => "#screen_title_application";
 
-		public override Color Background => new Color(11, 19, 28, 255);
-		//public Color MainCarouselColor { get; } = new Color(35, 38, 46, 255);
+        public override Color Background => new Color(11, 19, 28, 255);
+        //public Color MainCarouselColor { get; } = new Color(35, 38, 46, 255);
 
-		public string ApplicationName { get; set; } = "ERROR: No Application name";
-		public Texture2D ApplicationIcon { get; set; } = Icons.NoApplicationIcon;
+        public override int VerticalScrollAmount => scroll?.VerticalScroll ?? 0;
 
-		protected override Control Build()
-		{
-			var scroll = new ScrollLayoutControl(LayoutDirection.Vertical);
+        public string ApplicationName { get; set; } = "ERROR: No Application name";
+        public Texture2D ApplicationIcon { get; set; } = Icons.NoApplicationIcon;
 
-			var layout = new SimpleDirectionLayoutControl(LayoutDirection.Vertical);
+        private ScrollLayoutControl scroll;
 
-			// Space for header
-			layout.AddChild(new RectControl(new Vector2(1, 50), Background), (t) => (t as SimpleDirectionLayoutControlTransform).CrossAxisAlignment = CrossAxisAlignment.Stretch);
+        protected override Control Build()
+        {
+            scroll = new ScrollLayoutControl(LayoutDirection.Vertical);
+            scroll.UseScrollWheelVertical = true;
 
-			// Main application info
-			var mainInfoLayout = new SimpleDirectionLayoutControl(LayoutDirection.Horizontal);
-			mainInfoLayout.AddChild(new TextureControl(ApplicationIcon));
-			mainInfoLayout.AddChild(new SpacerControl(20, 1));
-			mainInfoLayout.AddChild(new LabelControl(ApplicationName, 30), (t) => { if (t is SimpleDirectionLayoutControlTransform slt) slt.CrossAxisAlignment = CrossAxisAlignment.Center; });
-			layout.AddChild(mainInfoLayout);
+            var layout = new SimpleDirectionLayoutControl(LayoutDirection.Vertical);
 
-			scroll.AddChild(layout);
+            // Space for header
+            layout.AddChild(new RectControl(new Vector2(1, 50), Background), (t) => (t as SimpleDirectionLayoutControlTransform).CrossAxisAlignment = CrossAxisAlignment.Stretch);
 
-			AddAction(ControllerButton.Face_Right, "#action_back", () => RemoveFromParent());
+            // Main application info
+            var mainInfoLayout = new SimpleDirectionLayoutControl(LayoutDirection.Horizontal);
+            mainInfoLayout.AddChild(new FillerControl(LayoutDirection.Horizontal));
+            mainInfoLayout.AddChild(new TextureControl(ApplicationIcon));
+            mainInfoLayout.AddChild(new SpacerControl(20, 1));
+            mainInfoLayout.AddChild(new LabelControl(ApplicationName, 30), (t) => { if (t is SimpleDirectionLayoutControlTransform slt) slt.CrossAxisAlignment = CrossAxisAlignment.Center; });
+            mainInfoLayout.AddChild(new FillerControl(LayoutDirection.Horizontal));
+            layout.AddChild(mainInfoLayout);
 
-			return scroll;
-		}
-	}
+            scroll.AddChild(layout);
+
+            Debug.DrawControlBounds(mainInfoLayout);
+
+            AddAction(ControllerButton.Face_Right, "#action_back", () => RemoveFromParent());
+
+            return scroll;
+        }
+    }
 }
