@@ -96,10 +96,10 @@ namespace FlatAppStore.UI.Framework
 
             // Ensure we can't scroll to the point where the scroll goes past the parent
             if (currentWidth > maxSize.X) MaxHorizontalScroll = (int)(currentWidth - maxSize.X);
-            else MaxHorizontalScroll = (int)currentWidth;
+            else MaxHorizontalScroll = 0;
 
             if (currentHeight > maxSize.Y) MaxVerticalScroll = (int)(currentHeight - maxSize.Y);
-            else MaxVerticalScroll = (int)currentHeight;
+            else MaxVerticalScroll = 0;
 
             if (ShouldScrollVertical && MaxVerticalScroll < 0)
                 Debug.DoNothing();

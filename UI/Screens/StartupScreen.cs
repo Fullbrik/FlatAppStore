@@ -27,7 +27,7 @@ namespace FlatAppStore.UI.Screens
 
             layout.AddChild(new RectControl(new Vector2(1, 50), MainCarouselColor), (t) => (t as SimpleDirectionLayoutControlTransform).CrossAxisAlignment = CrossAxisAlignment.Stretch);
 
-            var mainCarousel = new CarouselControl("#popular_apps", MainCarouselColor);
+            var mainCarousel = new CarouselControl("#carousel_popular_apps", MainCarouselColor);
             mainCarousel.OnTransformInitialized += (t) => mainCarousel.Focus();
             mainCarousel.BindChildGetFocus((c) => ScrollMainScrollTo(mainCarousel));
             layout.AddChild(mainCarousel);
