@@ -7,6 +7,7 @@
 
 	Screen titles
 #screen_title_startup=Startup
+#screen_title_application=Application
 #screen_title_search=Search
 
 	Actions

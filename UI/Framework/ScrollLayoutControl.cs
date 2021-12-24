@@ -9,7 +9,7 @@ namespace FlatAppStore.UI.Framework
 	{
 		public bool UseScrollWheelHorizontal { get; set; } = false;
 		public bool UseScrollWheelVertical { get; set; } = false;
-		public int ScrollWheelSpeed { get; set; } = 10;
+		public int ScrollWheelSpeed { get; set; } = 20;
 
 		public bool ShouldScrollHorizontal { get; set; } = false;
 		public bool ShouldScrollVertical { get; set; } = false;

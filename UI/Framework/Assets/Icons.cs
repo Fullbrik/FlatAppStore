@@ -6,12 +6,14 @@ namespace FlatAppStore.UI.Framework.Assets
 	public static class Icons
 	{
 		public static Texture2D Search { get; private set; }
+		public static Texture2D NoApplicationIcon { get; private set; }
 
 		private static readonly List<Texture2D> loadedTextures = new List<Texture2D>();
 
 		public static void LoadIcons()
 		{
 			Search = LoadIcon("/Assets/Icons/Search.png");
+			NoApplicationIcon = LoadIcon("/Assets/Icons/NoApplicationIcon.png");
 		}
 
 		public static void UnloadIcons()

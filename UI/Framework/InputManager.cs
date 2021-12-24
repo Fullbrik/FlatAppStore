@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace FlatAppStore.UI.Framework
 {
@@ -18,7 +19,7 @@ namespace FlatAppStore.UI.Framework
 			if (CurrentDriver == null) CurrentDriver = inputDriver;
 		}
 
-		public void CheckInput(Action<ControllerButton> onKeyDown, Action<float> onScroll)
+		public void CheckInput(Action<ControllerButton> onKeyDown, Action<float> onScroll, Action<Vector2, bool, bool, bool> mouseUpdate)
 		{
 			// Check for controller input
 			var inputsAndDrivers = inputDrivers.Select((driver) => (driver, driver.GetButtonsDown()));
@@ -35,6 +36,9 @@ namespace FlatAppStore.UI.Framework
 			// Check for scroll wheel
 			float scrollAmount = Raylib_cs.Raylib.GetMouseWheelMove();
 			if (scrollAmount != 0) onScroll(scrollAmount);
+
+			// Check for mouse
+			mouseUpdate(Raylib_cs.Raylib.GetMousePosition(), Raylib_cs.Raylib.IsMouseButtonPressed(Raylib_cs.MouseButton.MOUSE_LEFT_BUTTON), Raylib_cs.Raylib.IsMouseButtonPressed(Raylib_cs.MouseButton.MOUSE_MIDDLE_BUTTON), Raylib_cs.Raylib.IsMouseButtonPressed(Raylib_cs.MouseButton.MOUSE_RIGHT_BUTTON));
 		}
 
 		protected virtual void Dispose(bool disposing)

@@ -54,6 +54,13 @@ namespace FlatAppStore.UI.Framework
 			return this;
 		}
 
+		public Tween<T> StartWith(T with)
+		{
+			Initial = with;
+			Current = with;
+			return this;
+		}
+
 		public Tween<T> To(T target, float speed)
 		{
 			tweens.Add((target, speed, null));
@@ -72,7 +79,8 @@ namespace FlatAppStore.UI.Framework
 
 		public Tween<T> Delay(float time)
 		{
-			return To(tweens[tweens.Count - 1].target, time);
+			if (tweens.Count <= 0) return To(Initial, time);
+			else return To(tweens[tweens.Count - 1].target, time);
 		}
 
 		public void Start()

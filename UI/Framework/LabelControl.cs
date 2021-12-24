@@ -13,7 +13,8 @@ namespace FlatAppStore.UI.Framework
 				text = value;
 
 				if (string.IsNullOrEmpty(text)) localizedText = "";
-				else localizedText = Localization.LocalizationManager.GetLocalizedString(value);
+				else if (text.StartsWith("#")) localizedText = Localization.LocalizationManager.GetLocalizedString(value);
+				else localizedText = text;
 			}
 		}
 		private string text = "";
