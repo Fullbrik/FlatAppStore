@@ -29,17 +29,17 @@ namespace FlatAppStore.UI.Screens
 
             var mainCarousel = new CarouselControl("#carousel_popular_apps", MainCarouselColor);
             mainCarousel.OnTransformInitialized += (t) => mainCarousel.Focus();
-            mainCarousel.BindChildGetFocus((c) => ScrollMainScrollTo(mainCarousel));
+            mainCarousel.BindChildGetFocus((c) => ScrollScrollerTo(scroll, mainCarousel));
             layout.AddChild(mainCarousel);
 
             //layout.AddChild(new SpacerControl(0, 20)); // Add Spacer
 
             var category1 = new CarouselControl("#category_music_and_video", Background);
-            category1.BindChildGetFocus((c) => ScrollMainScrollTo(category1));
+            category1.BindChildGetFocus((c) => ScrollScrollerTo(scroll, category1));
             layout.AddChild(category1);
 
             var category2 = new CarouselControl("#category_communication", Background);
-            category2.BindChildGetFocus((c) => ScrollMainScrollTo(category2));
+            category2.BindChildGetFocus((c) => ScrollScrollerTo(scroll, category2));
             layout.AddChild(category2);
 
             // Setup layout for focus order thing with multi layouts. Just read the code it'll make sense.
@@ -59,13 +59,6 @@ namespace FlatAppStore.UI.Screens
             return scroll;
         }
 
-        private void ScrollMainScrollTo(Control control)
-        {
-            if (scroll.ShouldScrollHorizontal)
-                scroll.AnimateProperty<int>("HorizontalScroll").To((int)(control.Transform.LocalBounds.x - control.Transform.DrawBounds.width / 2f), .2f).Start();
 
-            if (scroll.ShouldScrollVertical)
-                scroll.AnimateProperty<int>("VerticalScroll").To((int)(control.Transform.LocalBounds.y - control.Transform.DrawBounds.height / 2f), .2f).Start();
-        }
     }
 }

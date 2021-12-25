@@ -45,5 +45,20 @@ namespace FlatAppStore.UI.Framework
 
             if (actionButtons.ContainsKey(button)) actionButtons[button]();
         }
+
+        protected void ScrollScrollerTo(ScrollLayoutControl scroller, Control control)
+        {
+            if (scroller.ShouldScrollHorizontal)
+                if (-(control.Transform.LocalBounds.x - control.Transform.DrawBounds.width / 2f) - control.Transform.DrawBounds.width < -scroller.Transform.DrawBounds.width) // If scrolling to the normal scroll + the size of the control will make the control go out of frame, scroll the control to the left.
+                    scroller.AnimateProperty<int>("HorizontalScroll").To((int)control.Transform.LocalBounds.x, .3f).Start();
+                else
+                    scroller.AnimateProperty<int>("HorizontalScroll").To((int)(control.Transform.LocalBounds.x - control.Transform.DrawBounds.width / 2f), .2f).Start();
+
+            if (scroller.ShouldScrollVertical)
+                if (-(control.Transform.LocalBounds.y - control.Transform.DrawBounds.height / 2f) - control.Transform.DrawBounds.height < -scroller.Transform.DrawBounds.height) // If scrolling to the normal scroll + the size of the control will make the control go out of frame, scroll the control to the top.
+                    scroller.AnimateProperty<int>("VerticalScroll").To((int)control.Transform.LocalBounds.y, .3f).Start();
+                else
+                    scroller.AnimateProperty<int>("VerticalScroll").To((int)(control.Transform.LocalBounds.y - control.Transform.DrawBounds.height / 2f), .2f).Start();
+        }
     }
 }

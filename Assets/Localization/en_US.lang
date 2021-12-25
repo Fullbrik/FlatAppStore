@@ -10,6 +10,9 @@
 #screen_title_application=Application
 #screen_title_search=Search
 
+	Other titles
+#title_description=Description
+
 	Actions
 #action_select=Select
 #action_back=Back
@@ -21,3 +24,5 @@
 #category_music_and_video=Music & Video
 #category_communication=Communication
 #category_productivity=Productivity
+
+#button_install=Install
