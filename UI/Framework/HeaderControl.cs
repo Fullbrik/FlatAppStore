@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using FlatAppStore.UI.Framework.Assets;
 using Raylib_cs;
 
@@ -6,6 +7,11 @@ namespace FlatAppStore.UI.Framework
 	public class HeaderControl : UserControl
 	{
 		public Color SearchTextColor { get; set; } = Color.GRAY;
+
+		protected override Task Load()
+		{
+			return Task.CompletedTask;
+		}
 
 		protected override Control Build()
 		{

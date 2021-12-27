@@ -1,11 +1,18 @@
 using System.Numerics;
+using System.Threading.Tasks;
 
 namespace FlatAppStore.UI.Framework
 {
 	public abstract class UserControl : LayoutControl
 	{
-		public override bool PerferExpandToParentWidth => false;
+		public bool IsLoading { get => isLoading; }
+		private bool isLoading;
 
+		public Task LoadTask { get; private set; }
+
+
+		public virtual bool DoLoad { get => false; }
+		public override bool PerferExpandToParentWidth => false;
 		public override bool PerferExpandToParentHeight => false;
 
 		protected override Transform CreateTransform(Control control)
@@ -13,9 +20,22 @@ namespace FlatAppStore.UI.Framework
 			return new Transform(control);
 		}
 
-		protected override void Initialized()
+		public async Task WaitUntilLoadingComplete()
 		{
+			while (IsLoading)
+			{
+				await Task.Delay(1);
+			}
+		}
+
+		protected override async void Initialized()
+		{
+			isLoading = true;
+			LoadTask = Load();
+			await LoadTask;
 			Rebuild();
+			//Parent.ReLayoutChildren();
+			isLoading = false;
 		}
 
 		public void Rebuild()
@@ -32,6 +52,8 @@ namespace FlatAppStore.UI.Framework
 
 			ResumeLayout();
 		}
+
+		protected abstract Task Load();
 
 		protected abstract Control Build();
 

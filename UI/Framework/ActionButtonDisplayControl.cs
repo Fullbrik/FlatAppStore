@@ -1,4 +1,5 @@
 using System.Numerics;
+using System.Threading.Tasks;
 
 namespace FlatAppStore.UI.Framework
 {
@@ -15,6 +16,11 @@ namespace FlatAppStore.UI.Framework
 		{
 			Name = name;
 			Button = button;
+		}
+
+		protected override Task Load()
+		{
+			return Task.CompletedTask;
 		}
 
 		protected override Control Build()

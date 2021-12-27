@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Threading.Tasks;
 
 namespace FlatAppStore.UI.Framework
 {
@@ -73,6 +74,11 @@ namespace FlatAppStore.UI.Framework
 				// Key is the button, while value is the name of the action
 				actionsLayout.AddChild(new PaddingControl(new ActionButtonDisplayControl(actionName.Value, actionName.Key), 0, 0, 10, 10));
 			}
+		}
+
+		protected override Task Load()
+		{
+			return Task.CompletedTask;
 		}
 	}
 }

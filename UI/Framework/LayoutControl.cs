@@ -260,6 +260,14 @@ namespace FlatAppStore.UI.Framework
 				action();
 		}
 
+		protected async System.Threading.Tasks.Task WaitChildLoopCompleteAsync()
+		{
+			while (isInChildLoop)
+			{
+				await System.Threading.Tasks.Task.Delay(1);
+			}
+		}
+
 		protected virtual void AddedChild(Control child) { }
 		protected virtual void RemovedChild(Control child) { }
 	}
