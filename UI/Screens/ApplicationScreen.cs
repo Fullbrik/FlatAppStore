@@ -2,6 +2,7 @@ using System.Numerics;
 using FlatAppStore.UI.Controls;
 using FlatAppStore.UI.Framework;
 using FlatAppStore.UI.Framework.Assets;
+using FlatAppStore.UI.Models;
 using Raylib_cs;
 
 namespace FlatAppStore.UI.Screens
@@ -10,18 +11,21 @@ namespace FlatAppStore.UI.Screens
     {
         public override string Title => "#screen_title_application";
 
-        public override Color Background => new Color(11, 19, 28, 255);
-        public Color ScreenshotCarouselColor { get; } = new Color(35, 38, 46, 255);
+        public override Color Background => Theme.PrimaryColor;
+        public Color ScreenshotCarouselColor { get => Theme.SecondaryColor; }
 
         public override int VerticalScrollAmount => scroll?.VerticalScroll ?? 0;
 
-        public string ApplicationName { get; set; } = "Loading Application Name...";
-        public string DeveloperName { get; set; } = "Loading Developer...";
-        public Texture2D ApplicationIcon { get; set; } = Icons.NoApplicationIcon;
-
-        public string Description { get; set; } = LoremIpsum.Generate(3);
+        public ApplicationData ApplicationData { get; set; } = ApplicationData.Default;
 
         private ScrollLayoutControl scroll;
+
+        public ApplicationScreen() { }
+
+        public ApplicationScreen(ApplicationData data)
+        {
+            ApplicationData = data;
+        }
 
         protected override Control Build()
         {
@@ -40,14 +44,14 @@ namespace FlatAppStore.UI.Screens
             var mainInfoLayout = new SimpleDirectionLayoutControl(LayoutDirection.Horizontal);
             mainInfoLayout.AddChild(new FillerControl(LayoutDirection.Horizontal));
 
-            mainInfoLayout.AddChild(new TextureControl(ApplicationIcon));
+            mainInfoLayout.AddChild(new TextureControl(ApplicationData.Icon));
 
             mainInfoLayout.AddChild(new SpacerControl(20, 1));
 
             var titleAndDeveloperNameLayout = new SimpleDirectionLayoutControl(LayoutDirection.Vertical);
-            titleAndDeveloperNameLayout.AddChild(new LabelControl(ApplicationName, 30, Color.WHITE));
+            titleAndDeveloperNameLayout.AddChild(new LabelControl(ApplicationData.Name, 30, Color.WHITE));
             titleAndDeveloperNameLayout.AddChild(new SpacerControl(1, 5));
-            titleAndDeveloperNameLayout.AddChild(new LabelControl(DeveloperName, 25, Color.LIGHTGRAY));
+            titleAndDeveloperNameLayout.AddChild(new LabelControl(ApplicationData.Developer, 25, Color.LIGHTGRAY));
 
             mainInfoLayout.AddChild(titleAndDeveloperNameLayout, (t) => { if (t is SimpleDirectionLayoutControlTransform slt) slt.CrossAxisAlignment = CrossAxisAlignment.Center; });
 
@@ -63,11 +67,11 @@ namespace FlatAppStore.UI.Screens
             layout.AddChild(new SpacerControl(1, 20));
 
             // Screenshots
-            var screenshotCarousel = new CarouselControl("#carousel_screenshots", ScreenshotCarouselColor);
+            var screenshotCarousel = new CarouselControl<Texture2D>("#carousel_screenshots", ScreenshotCarouselColor, (t) => new ScreenshotControl(t));
             layout.AddChild(screenshotCarousel);
 
             // Description
-            var descriptionControl = new DescriptionControl(Description);
+            var descriptionControl = new DescriptionControl(ApplicationData.Description);
             var descriptionControlFocusProvider = new SimpleDirectionLayoutControl(LayoutDirection.Horizontal); //new SingleFocusableProvider<DescriptionControl>(descriptionControl);
             descriptionControlFocusProvider.AddChild(descriptionControl);
             layout.AddChild(descriptionControlFocusProvider);
@@ -91,6 +95,7 @@ namespace FlatAppStore.UI.Screens
             installButton.Focus();
 
             // Add actions
+            AddAction(ControllerButton.Face_Down, "#action_select", () => FocusableUserControl.CurrentFocusedWidget?.DoAction());
             AddAction(ControllerButton.Face_Right, "#action_back", () => RemoveFromParent());
 
             return scroll;

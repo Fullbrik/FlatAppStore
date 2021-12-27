@@ -26,5 +26,10 @@ namespace FlatAppStore.UI.Controls
 
             return layout;
         }
+
+        public override void DoAction()
+        {
+
+        }
     }
 }

@@ -3,24 +3,23 @@ using Raylib_cs;
 
 namespace FlatAppStore.UI.Screens
 {
-	public class SearchScreen : ScreenControl
-	{
-		public override string Title => "#screen_title_search";
+    public class SearchScreen : ScreenControl
+    {
+        public override string Title => "#screen_title_search";
 
-		public override Color Background => background;
-		Color background = new Color(11, 19, 28, 255);
+        public override Color Background => Theme.PrimaryColor;
 
-		protected override Control Build()
-		{
-			AddAction(ControllerButton.Face_Right, "#action_back", () => RemoveFromParent());
+        protected override Control Build()
+        {
+            AddAction(ControllerButton.Face_Right, "#action_back", () => RemoveFromParent());
 
-			var layout = new SimpleDirectionLayoutControl(LayoutDirection.Vertical);
+            var layout = new SimpleDirectionLayoutControl(LayoutDirection.Vertical);
 
-			var header = new RectControl(Raylib_cs.Color.BLACK);
-			header.Height = 50;
-			layout.AddChild(header, (t) => (t as SimpleDirectionLayoutControlTransform).CrossAxisAlignment = CrossAxisAlignment.Stretch);
+            var header = new RectControl(Raylib_cs.Color.BLACK);
+            header.Height = 50;
+            layout.AddChild(header, (t) => (t as SimpleDirectionLayoutControlTransform).CrossAxisAlignment = CrossAxisAlignment.Stretch);
 
-			return layout;
-		}
-	}
+            return layout;
+        }
+    }
 }

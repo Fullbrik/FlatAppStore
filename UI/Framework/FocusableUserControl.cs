@@ -62,6 +62,8 @@ namespace FlatAppStore.UI.Framework
                 .Start();
         }
 
+        public abstract void DoAction();
+
         public void OverideFocusLayoutProvider(IFocusLayoutProvider focusLayoutProvider)
         {
             overrideFocusLayoutProvider = focusLayoutProvider;

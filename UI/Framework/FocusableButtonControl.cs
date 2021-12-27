@@ -34,5 +34,10 @@ namespace FlatAppStore.UI.Framework
 
             base.Draw();
         }
+
+        public override void DoAction()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

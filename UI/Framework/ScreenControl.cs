@@ -60,5 +60,8 @@ namespace FlatAppStore.UI.Framework
                 else
                     scroller.AnimateProperty<int>("VerticalScroll").To((int)(control.Transform.LocalBounds.y - control.Transform.DrawBounds.height / 2f), .2f).Start();
         }
+
+        public virtual void OnBecomeMainScreen() { }
+        public virtual void OnBecomeNotMainScreen() { }
     }
 }

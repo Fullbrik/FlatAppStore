@@ -21,5 +21,10 @@ namespace FlatAppStore.UI.Controls
 
             return control;
         }
+
+        public override void DoAction()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }
